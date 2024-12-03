@@ -397,10 +397,23 @@ namespace HelloMod
             PatchTargetPostfix(
                   typeof(DungeonPhysical).GetMethod("AKMText"),
                   typeof(DungeonPhysicalOverride).GetMethod("AKMTextPostfix"));
-            //可以多选的情况下选择只进行不到最大值的选择的提示框
+            //可以多选的情况下选择只进行不到最大值的选择的提示框 ==>天赋等相关的次级窗口
             PatchTargetPostfix(
                   typeof(DungeonActionTalentDeckTargetted).GetMethod("ConfirmText"),
-                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionTalentDeckTargetted_ConfirmTextPostfix")); 
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionTalentDeckTargetted_ConfirmTextPostfix"));
+            PatchTargetPrefix(
+                  typeof(DungeonActionLevelUpDeckTargetted).GetMethod("BuildFromReward"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionLevelUpDeckTargetted_BuildFromReward"));
+            PatchTargetPrefix(
+                  typeof(DungeonActionTalentDeckTargetted).GetMethod("CreateConfirmVerification"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionTalentDeckTargetted_CreateConfirmVerification"));
+            PatchTargetPrefix(
+                  typeof(DungeonActionTalentDeckTargetted).GetMethod("BuildFromTalent"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionTalentDeckTargetted_BuildFromTalent"));
+            PatchTargetPrefix(
+                  typeof(DungeonActionDynamicDeckTargetted).GetMethod("BuildFromString"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionDynamicDeckTargetted_BuildFromString"));
+
             PatchTargetPostfix(
                   typeof(ActionModal).GetMethod("Choices"),
                   typeof(HelloMod).GetMethod("ActionModal_Choices"));

@@ -12,6 +12,7 @@ namespace HelloMod
     public static class TR
     {
         public const string SK = "SpecialKeyword";
+        public const string PlaceHolder = "{value}";
         public static string GetStr(string tableKey, string str, string note = null)
         {
             return TranslationManager.GetTranslation(tableKey, str, note);
