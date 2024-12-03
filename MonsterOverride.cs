@@ -36,7 +36,28 @@ namespace HelloMod
                 __result = HelloMod.Csv.GetTranslationByID("MonsterPower", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
             }
         }
-        //TODO
+
+        public static void MonsterCounterString(ref string __result,int x, Monster __instance)
+        {
+            if (!string.IsNullOrEmpty(__instance.monsterPowers))
+            {
+                __instance.Name();
+                __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
+            }
+        }
+        //AirElemental
+        public static void AEMonsterCounterString(ref string __result, int x, AirElemental __instance)
+        {
+            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()])
+                .Replace(TR.PlaceHolder, x.ToString());
+        }
+        //WaterElemental
+        public static void WEMonsterCounterString(ref string __result, int x, WaterElemental __instance)
+        {
+            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()])
+                .Replace(TR.PlaceHolder, x.ToString());
+        }
+
         public static void CombatPowerStringPostfix(ref string __result, Monster __instance)
         {
             __result = "<*" + __instance.Name() + "> \n <*" + __instance.LevelString() + "> \n " + __instance.PowerString();

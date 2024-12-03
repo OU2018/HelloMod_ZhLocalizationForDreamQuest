@@ -179,6 +179,15 @@ namespace HelloMod
                                 typeof(Monster).GetMethod("PowerString"),
                                 typeof(MonsterOverride).GetMethod("PowerStringPostfix"));
             PatchTargetPostfix(
+                                typeof(Monster).GetMethod("MonsterCounterString"),
+                                typeof(MonsterOverride).GetMethod("MonsterCounterString"));
+            PatchTargetPostfix(
+                                typeof(AirElemental).GetMethod("MonsterCounterString"),
+                                typeof(MonsterOverride).GetMethod("AEMonsterCounterString"));
+            PatchTargetPostfix(
+                                typeof(WaterElemental).GetMethod("MonsterCounterString"),
+                                typeof(MonsterOverride).GetMethod("WEMonsterCounterString"));
+            PatchTargetPostfix(
                                 typeof(Monster).GetMethod("CombatPowerString"),
                                 typeof(MonsterOverride).GetMethod("CombatPowerStringPostfix"));
             PatchTargetPostfix(
@@ -187,6 +196,13 @@ namespace HelloMod
             PatchTargetPostfix(
                                 typeof(Monster).GetMethod("Defeated"),
                                 typeof(MonsterOverride).GetMethod("DefeatedPostfix"));
+
+            //战斗中弃牌
+            PatchTargetPostfix(
+                typeof(ActionDiscard).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionDiscard_SetTargetFinderParameters_Postfix")
+                );
+            //Select a card ||TODO:等待替换
             //Achievement Viewer 运行时替换
             var SDAVBuildTextPaneMethod = typeof(ShopDialogueAchievementViewer).GetMethod("BuildTextPane", BindingFlags.Public | BindingFlags.Instance);
             var SDAVBuildTextPaneDict = new Dictionary<string, string> { 
@@ -862,6 +878,14 @@ namespace HelloMod
             {
                 __result[0] = TR.GetStr(DungeonPhysicalOverride.TableKey, "Yes");
                 __result[1] = TR.GetStr(DungeonPhysicalOverride.TableKey, "No");
+            }
+        }
+
+        public static void ActionDiscard_SetTargetFinderParameters_Postfix(TargetFinderParameters tf,ActionDiscard __instance)
+        {
+            if (!DreamQuestConfig.IsEn) {
+                tf.cardButtonText = TR.GetStr(DungeonPhysicalOverride.TableKey, "Discard this");
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "DiscardContent").Replace(TR.PlaceHolder, __instance.strength.ToString());
             }
         }
 

@@ -144,8 +144,8 @@ namespace HelloMod
                     PlayerAttributes attr = buff.att;
                     if (attr == PlayerAttributes.MONSTER_COUNTER)//
                     {
-                        /*__result.Add(new Infoblock.PlayerEffectWrapper(PlayerAttributes.MONSTER_COUNTER, (Texture)Resources.Load("Textures/IconMonsterCounter", typeof(Texture)), __instance.monsterCounter, __instance.player.MonsterCounterString(__instance.monsterCounter)));*/
-                        //TODO
+                        int value = buff.n;
+                        buff.s = __instance.player.MonsterCounterString(value);
                     }
                     else
                     {
