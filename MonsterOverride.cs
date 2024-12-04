@@ -32,8 +32,16 @@ namespace HelloMod
         public static void PowerStringPostfix(ref string __result,Monster __instance) {
             if (!TextboxFormatTextAnalize.ContainsChinese(__result))
             {
-                __instance.Name();
-                __result = HelloMod.Csv.GetTranslationByID("MonsterPower", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
+                if(__instance.GetType() == typeof(FinalBoss))
+                {
+                    //最终boss需要进行特殊处理
+                    __result = __instance.dungeon.FinalBossPowers();
+                }
+                else
+                {
+                    __instance.Name();
+                    __result = HelloMod.Csv.GetTranslationByID("MonsterPower", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
+                }
             }
         }
 

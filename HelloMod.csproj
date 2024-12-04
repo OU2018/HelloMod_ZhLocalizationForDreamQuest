@@ -91,23 +91,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AltarOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityNormalPatch.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityOverride.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityPatch.cs" />
     <Compile Include="CsvParagraphParser.cs" />
+    <Compile Include="DecreeOverride.cs" />
     <Compile Include="DungeonActionDeckTargettedOverride.cs" />
     <Compile Include="DungeonActionOverride.cs" />
     <Compile Include="DungeonFeatureGroup\BlacksmithOverride.cs" />
     <Compile Include="DungeonFeatureGroup\DungeonFeaturePatch.cs" />
     <Compile Include="DungeonFeatureGroup\HealingPoolOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealthPackOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\LevelStartOverride.cs" />
     <Compile Include="DungeonFeatureGroup\LichHunterOverride.cs" />
     <Compile Include="DungeonFeatureGroup\MonasteryOverride.cs" />
     <Compile Include="DungeonFeatureGroup\ShopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\SmoothieShackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\StairOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\ThroneOverride.cs" />
     <Compile Include="DungeonFeatureGroup\TreasureChestOverride.cs" />
     <Compile Include="DungeonOverride.cs" />
     <Compile Include="DungeonPhysicalOverride.cs" />
@@ -117,6 +120,7 @@
     <Compile Include="FormatTextTranpiler.cs" />
     <Compile Include="InfoblockOverride.cs" />
     <Compile Include="LevelUpRewardOverride.cs" />
+    <Compile Include="LordlyDecreesOverride.cs" />
     <Compile Include="MonsterOverride.cs" />
     <Compile Include="ReplaceStringPatch.cs" />
     <Compile Include="SDBOverride.cs" />
@@ -126,10 +130,10 @@
     <Compile Include="DreamQuestConfig.cs" />
     <Compile Include="HelloMod.cs" />
     <Compile Include="IniParser.cs" />
-    <Compile Include="LevelStartOverride.cs" />
     <Compile Include="MainMenuOverride.cs" />
     <Compile Include="ProfessionBaseOverride.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShopDialogueCardViewerOverride.cs" />
     <Compile Include="ShopDialogueTalentViewerOverride.cs" />
     <Compile Include="StringReplacePatcher.cs" />
     <Compile Include="TemplateAttackCard.cs" />

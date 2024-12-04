@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityScript.Lang;
 
@@ -146,7 +147,23 @@ namespace HelloMod.DungeonFeatureGroup
                     if (shopDialogueCard.card is BonusCard)
                     {
                         text2 = TR.GetStr(_dungeonFeatureTableName, "Gain", "TREASURE");
-                        ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText(shopDialogueCard.card.cardName + string.Empty, 22, Color.black);
+                        string sddtText = shopDialogueCard.card.cardName;
+                        if (!string.IsNullOrEmpty(sddtText))
+                        {
+                            // 使用正则表达式提取所有数字
+                            Regex regex = new Regex(@"\d+");
+                            string value = string.Empty;
+                            // 找到所有匹配的数字
+                            MatchCollection matches = regex.Matches(sddtText);
+                            if (matches.Count > 0)
+                            {
+                                value = matches[0].Value;
+                                sddtText = sddtText.Replace(value, "").Replace(" ", "");
+                                sddtText = TR.GetStr("CardName", sddtText);
+                                sddtText = value + " " + sddtText;
+                            }
+                        }
+                        ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText(sddtText + string.Empty, 22, Color.black);
                         float num6 = 0.1f;
                         if (GameManager.IsIPhone())
                         {

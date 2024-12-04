@@ -10,6 +10,7 @@ namespace HelloMod.DungeonFeatureGroup
     internal abstract class DungeonFeaturePatch
     {
         protected static string _dungeonFeatureTableName = "DungeonFeatureName";
+        protected static string _dungeonFeaturePragraphTableName = "DungeonFeatureParagraph";
 
         public abstract void Patch(Harmony harmony,HelloMod modCenter);
     }

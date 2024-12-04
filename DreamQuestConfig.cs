@@ -29,6 +29,8 @@ namespace HelloMod
 
         public static bool CardViewer_Mainly_display_the_original_text = false;//卡牌图鉴中，当混合显示时，优先显示原文
 
+        public static bool RandomName_Not_Contain_Translation = true;//混合显示的情况下，随机卡牌名不会包含译文
+
         public static bool IsZh { get { return CurrentLang == "zh"; } }
         public static bool IsEn { get { return CurrentLang == "en"; } }//一般用来判断是否执行原方法
     }

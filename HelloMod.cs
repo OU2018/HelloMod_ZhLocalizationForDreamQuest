@@ -297,20 +297,6 @@ namespace HelloMod
                                 typeof(ProfessionBaseOverride).GetMethod("AbilityDescriptionPostfix"));
             PostPatchVirtualMethodAndOverrides(harmony, typeof(ProfessionBase), "Description",
                                 typeof(ProfessionBaseOverride).GetMethod("DescriptionPostfix"));
-            //祭坛事件翻译 TODO
-            PatchTargetPostfix(
-                  typeof(Altar).GetMethod("Name"),
-                  typeof(AltarOverride).GetMethod("Name"));
-            PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "GodName",
-                                typeof(AltarOverride).GetMethod("GodName"));
-            PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "Hint",
-                                typeof(AltarOverride).GetMethod("Hint"));
-            PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "CarvedMessage",
-                                typeof(AltarOverride).GetMethod("CarvedMessage"));
-            PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "AcceptMessage",
-                                typeof(AltarOverride).GetMethod("AcceptMessage"));
-            PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "SigilDescription",
-                                typeof(AltarOverride).GetMethod("SigilDescription"));
             //卡牌翻译 TODO
             /*PostPatchVirtualMethodAndOverrides(harmony, typeof(ActionCard), "PythonInitialize",
                                 typeof(HelloMod).GetMethod("Card_PythonInitialize_Postfix"));
@@ -342,6 +328,20 @@ namespace HelloMod
             PatchTargetPostfix(
                 typeof(ShopDialogueCardViewer).GetMethod("TypeToName"),
                 typeof(HelloMod).GetMethod("ShopDialogueCardViewer_TypeToNamePostfix")
+                );
+            //修复 随机卡牌可能包含译文的问题
+            PatchTargetPostfix(
+                typeof(CardFinder).GetMethod("RandomName"),
+                typeof(HelloMod).GetMethod("CardFinder_RandomName")
+                );
+            //Dungeon 卡组，最终Boss能力字符串
+            PatchTargetPrefix(
+                typeof(Dungeon).GetMethod("BasicDeckViewer"),
+                typeof(DungeonOverride).GetMethod("BasicDeckViewer")
+                );
+            PatchTargetPostfix(
+                typeof(Dungeon).GetMethod("FinalBossPowers"),
+                typeof(DungeonOverride).GetMethod("FinalBossPowers")
                 );
             //此处不易进行修改
             /*PatchTargetPostfix(
@@ -533,6 +533,9 @@ namespace HelloMod
                 new StairOverride(),
                 new ShopOverride(),
                 new SmoothieShackOverride(),
+                new LevelStartOverride(),
+                new ThroneOverride(),
+                new AltarOverride(),
             };
             foreach (DungeonFeaturePatch patch in patches)
             {
@@ -557,6 +560,7 @@ namespace HelloMod
             bool seenAllCards = parser.GetBool("Features", "SeenAllCard", false);
             bool mixCardName = parser.GetBool("Features", "MixCardName", false);
             bool cmdtot = parser.GetBool("Features", "CardViewer_Mainly_display_the_original_text", false);
+            bool rnct = parser.GetBool("Features", "RandomName_Not_Contain_Translation", true);
             int maxPlayers = parser.GetInt("Settings", "MaxPlayers", 4);
             int gameSpeed = parser.GetInt("Settings", "GameSpeed", 1);
             Logger.LogInfo(lang + "|" + coverFont + "|" + unlockAll);
@@ -570,6 +574,7 @@ namespace HelloMod
             DreamQuestConfig.SeenAllCard = seenAllCards;
             DreamQuestConfig.MixCardName = mixCardName;
             DreamQuestConfig.CardViewer_Mainly_display_the_original_text = cmdtot;
+            DreamQuestConfig.RandomName_Not_Contain_Translation = rnct;
 
             if(DreamQuestConfig.IsZh)
             {
@@ -823,19 +828,22 @@ namespace HelloMod
             CardNameReplace(ref __instance.realName, ref originCardName);
         }
 
+        public static void CardFinder_RandomName(ref string __result)
+        {
+            if (DreamQuestConfig.MixCardName)
+            {
+                if (DreamQuestConfig.RandomName_Not_Contain_Translation)
+                {
+                    __result = __result.Split('\n')[0];
+                }
+            }
+        }
+
         public static void MonsterData_MonsterData(MonsterData __instance, string internalName, Environments[] locations, int minLevel, int maxLevel, bool boss, int cryptin, int forestin, int dungeonin, int waterin, int volcanoin, int mountainin, string monsterName, string bestiaryEntry)
         {
             if (!DreamQuestConfig.IsEn)
             {
                 __instance.bestiaryEntry = Csv.GetTranslationByID("MonsterBestiary", "_" + __instance.internalName);
-            }
-        }
-        //不适宜修改
-        public static void CardList_GetCardListPostfix(ref List<CardData> __result) {
-            foreach (CardData card in __result)
-            {
-                string originCardName = string.Empty;
-                CardNameReplace(ref card.realName, ref originCardName);
             }
         }
         //TODO:通过读取配置，决定是否中英文同时显示

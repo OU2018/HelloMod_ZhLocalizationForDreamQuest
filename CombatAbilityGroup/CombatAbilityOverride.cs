@@ -13,10 +13,6 @@ namespace HelloMod.CombatAbilityGroup
             modCenter.PatchTargetPostfix(
                 typeof(CombatAbility).GetMethod("FailText"),
                 typeof(CombatAbilityOverride).GetMethod("FailTextPostfix"));
-            /*modCenter.PatchTargetPrefix(
-                typeof(CombatAbility).GetMethod("Open"),
-                typeof(CombatAbilityOverride).GetMethod("Open")
-                );*/
         }
 
         public static void FailTextPostfix(ref string __result)
