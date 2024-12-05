@@ -33,7 +33,7 @@ namespace HelloMod.DungeonFeatureGroup
 
         public static void GenerateText(Throne __instance)
         {
-            __instance.text = HelloMod.Csv.GetTranslationByID("DungeonFeatureParagraph", "_throne_content");
+            __instance.text = HelloMod.Csv.GetTranslationByID(_dungeonFeatureTableName, "_throne_content");
         }
 
         public static bool DisplayInMini(Throne __instance)

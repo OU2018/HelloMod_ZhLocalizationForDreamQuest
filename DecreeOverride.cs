@@ -17,44 +17,44 @@ namespace HelloMod
             {
                 if (__instance.isLike)
                 {
-                    text = "Each turn, DO play a card whose name starts with the letter '" + __instance.strength + "'";
+                    text = "Each turn, DO play a card whose name starts with the letter '{value}'";
                 }
                 else
                 {
-                    text = "DO NOT play cards whose names start with the letter '" + __instance.strength + "'";
+                    text = "DO NOT play cards whose names start with the letter '{value}'";
                 }
             }
             else if (decreeType == DecreeType.NAME_CONTAINS)
             {
                 if (__instance.isLike)
                 {
-                    text = "Each turn, DO play a card whose name contains the letter '" + __instance.strength + "'";
+                    text = "Each turn, DO play a card whose name contains the letter '{value}'";
                 }
                 else
                 {
-                    text = "DO NOT play cards whose names contain the letter '" + __instance.strength + "'";
+                    text = "DO NOT play cards whose names contain the letter '{value}'";
                 }
             }
             else if (decreeType == DecreeType.CARD_TYPE)
             {
                 if (__instance.isLike)
                 {
-                    text = "Each turn, DO play " + __instance.ModArticle() + " " + __instance.strength + " card";
+                    text = "Each turn, DO play " + __instance.ModArticle() + " {value} card";
                 }
                 else
                 {
-                    text = "DO NOT play " + __instance.strength + " cards";
+                    text = "DO NOT play {value} cards";
                 }
             }
             else if (decreeType == DecreeType.SPECIFIC_CARD)
             {
                 if (__instance.isLike)
                 {
-                    text = "Each turn, DO play a card named '" + __instance.strength + "'";
+                    text = "Each turn, DO play a card named '{value}'";
                 }
                 else
                 {
-                    text = "DO NOT play cards named '" + __instance.strength + "'";
+                    text = "DO NOT play cards named '{value}'";
                 }
             }
             __result = text;

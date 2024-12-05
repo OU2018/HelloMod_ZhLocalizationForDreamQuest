@@ -172,9 +172,9 @@ namespace HelloMod
             PatchTargetPostfix(
                                 typeof(Monster).GetMethod("Name"),
                                 typeof(MonsterOverride).GetMethod("NamePostfix"));
-            PatchTargetPostfix(
-                                typeof(Monster).GetMethod("Devour"),
-                                typeof(MonsterOverride).GetMethod("DevourPostfix"));
+            PatchTargetPrefix(
+                                typeof(Monster).GetMethod("DevourString"),
+                                typeof(MonsterOverride).GetMethod("DevourStringPostfix"));
             PatchTargetPostfix(
                                 typeof(Monster).GetMethod("PowerString"),
                                 typeof(MonsterOverride).GetMethod("PowerStringPostfix"));
@@ -373,6 +373,9 @@ namespace HelloMod
                                 typeof(CombatAbilityNormalPatch).GetMethod("NamePostfix"));
             PostPatchVirtualMethodAndOverrides(harmony, typeof(CombatAbility), "Description",
                                 typeof(CombatAbilityNormalPatch).GetMethod("DescriptionPostfix"));
+            //DungeonAction
+            PostPatchVirtualMethodAndOverrides(harmony, typeof(DungeonAction), "ButtonName",
+                                typeof(DungeonActionOverride).GetMethod("ButtonNamePostfix"));
             //结算界面子界面重载 翻译
             PatchTargetPrefix(
                 typeof(DungeonStats).GetMethod("CreateScoreDialogue"),
@@ -536,6 +539,9 @@ namespace HelloMod
                 new LevelStartOverride(),
                 new ThroneOverride(),
                 new AltarOverride(),
+                new MushroomOverride(),
+                new MushroomPatchOverride(),
+                new BrainsuckerOverride(),
             };
             foreach (DungeonFeaturePatch patch in patches)
             {
@@ -930,6 +936,21 @@ namespace HelloMod
                     __instance.text.text = s.realName.Split('\n')[1];//译文
                 }
             }
+        }
+
+        public static void Dragon_SmashPage(ProfessionDragon __instance)
+        {
+            string text = "There was something here \n Now it's a smoking ruin \n Darn - stupid dragon";
+            float x = __instance.dungeon.physical.WindowSize().x;
+            ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText("Dragon Smash!", 48, Color.black);
+            ShopDialogueText shopDialogueText = SDB.CenteredText(x, text, 32, Color.black);
+            SDB.Background(shopDialogueText);
+            ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueDynamicText, shopDialogueText }, "VP", 0.1f);
+            SDB.Background(shopDialogueAligned, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)));
+            SDB.CancelButton(shopDialogueAligned, __instance.dungeon.WindowBack);
+            shopDialogueAligned.UpperCenterTo(__instance.dungeon.ShopLocation());
+            __instance.dungeon.activeShop = shopDialogueAligned;
+            shopDialogueAligned.DoneBuilding();
         }
 
         public string url;

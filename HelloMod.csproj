@@ -101,12 +101,15 @@
     <Compile Include="DungeonActionDeckTargettedOverride.cs" />
     <Compile Include="DungeonActionOverride.cs" />
     <Compile Include="DungeonFeatureGroup\BlacksmithOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\BrainsuckerOverride.cs" />
     <Compile Include="DungeonFeatureGroup\DungeonFeaturePatch.cs" />
     <Compile Include="DungeonFeatureGroup\HealingPoolOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealthPackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\LevelStartOverride.cs" />
     <Compile Include="DungeonFeatureGroup\LichHunterOverride.cs" />
     <Compile Include="DungeonFeatureGroup\MonasteryOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\MushroomOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\MushroomPatchOverride.cs" />
     <Compile Include="DungeonFeatureGroup\ShopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\SmoothieShackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\StairOverride.cs" />

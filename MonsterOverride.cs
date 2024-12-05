@@ -9,9 +9,34 @@ namespace HelloMod
     {
         private static string _monsterName = "MonsterName";
         //疑似是巨龙的吞噬技能
-        public static void DevourPostfix()
+        public static bool DevourStringPostfix(string s,Monster __instance)
         {
+            if (s.Contains("Gained"))
+            {
+                string[] para = s.Split(' ');
+                string cardName = para[1];
+                s = TR.GetStr(TranslationManager.specialTableKey, "Gained") + TR.GetStr("CardName", cardName);
+            }
+            else
+            {
+                s = s.Replace("Fully Heal", TR.GetStr(TranslationManager.specialTableKey, "Fully Heal"));
+                s = s.Replace("Max Health", TR.GetStr(TranslationManager.specialTableKey, "Max Health"));
+                s = s.Replace("Equipment Slot", TR.GetStr(TranslationManager.specialTableKey, "Equipment Slot"));
+                s = s.Replace("Damage Taken!", TR.GetStr(TranslationManager.specialTableKey, "Damage Taken!"));
+                s = s.Replace("Card", TR.GetStr(TranslationManager.specialTableKey, "Card"));
+                s = s.Replace("Action", TR.GetStr(TranslationManager.specialTableKey, "Action"));
+                s = s.Replace("Mana", TR.GetStr(TranslationManager.specialTableKey, "Mana"));
+            }
 
+            if (s.StartsWith("Yuck"))
+            {
+                __instance.dungeon.player.PlayerSpriteTextQueued(s, 3, Utility.darkRed);
+            }
+            else
+            {
+                __instance.dungeon.player.PlayerSpriteTextQueued(s, 3, Utility.darkGreen);
+            }
+            return false;
         }
 
         private static Dictionary<string, string> monsterNameCacheDict = new Dictionary<string, string>();

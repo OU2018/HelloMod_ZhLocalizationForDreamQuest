@@ -24,6 +24,10 @@ namespace HelloMod.DungeonFeatureGroup
                   typeof(AltarOverride).GetMethod("AcceptMessage"));
             HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "SigilDescription",
                   typeof(AltarOverride).GetMethod("SigilDescription"));
+
+            modCenter.PatchTargetPrefix(
+                  typeof(Altar).GetMethod("DisplayInMini"),
+                  typeof(AltarOverride).GetMethod("DisplayInMini"));
         }
         private static string _altarTableName = "Altar";
         public static void Name(ref string __result)
@@ -75,7 +79,7 @@ namespace HelloMod.DungeonFeatureGroup
             float y = physical.renderer.bounds.size.y;
             ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText(__instance.Name(), 32, Color.white);
             ShopDialogueClickableIcon shopDialogueClickableIcon = SDB.ClickableIcon(new Vector2(x * 0.5f, x * 0.5f), __instance.Portrait(), string.Empty);
-            ShopDialogueButton shopDialogueButton = SDB.BasicButton(new Vector2(x * 0.6f, 0.35f), "Investigate", __instance.Investigate);
+            ShopDialogueButton shopDialogueButton = SDB.BasicButton(new Vector2(x * 0.6f, 0.35f), TR.GetStr(_dungeonFeatureTableName, "Investigate"), __instance.Investigate);
             shopDialogueButton.FontSize(24);
             shopDialogueButton.ColliderMod(1.2f, 1.5f);
             ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueDynamicText, shopDialogueClickableIcon }, "VP", 0.1f);
