@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace HelloMod
 {
@@ -74,20 +75,40 @@ namespace HelloMod
         {
             if (!string.IsNullOrEmpty(__instance.monsterPowers))
             {
-                __instance.Name();
-                __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
+                if(__instance.GetType() == typeof(AirElemental)
+                    || __instance.GetType() == typeof(WaterElemental)
+                    )
+                {
+
+                }else if (__instance.GetType() == typeof(Ghost))
+                {
+                    string pattern = @"(\d+)";//匹配数字
+                                              // 创建正则表达式对象
+                    Regex regex = new Regex(pattern);
+
+                    // 获取所有匹配的内容
+                    MatchCollection matches = regex.Matches(__result);
+                    if (matches.Count > 0) {
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_Ghost").Replace(TR.PlaceHolder, matches[0].Value);
+                    }
+                }
+                else
+                {
+                    __instance.Name();
+                    __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()]);
+                }
             }
         }
         //AirElemental
         public static void AEMonsterCounterString(ref string __result, int x, AirElemental __instance)
         {
-            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()])
+            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_AirElemental")
                 .Replace(TR.PlaceHolder, x.ToString());
         }
         //WaterElemental
         public static void WEMonsterCounterString(ref string __result, int x, WaterElemental __instance)
         {
-            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + monsterNameCacheDict[__instance.GetType().ToString()])
+            __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_WaterElemental")
                 .Replace(TR.PlaceHolder, x.ToString());
         }
 
