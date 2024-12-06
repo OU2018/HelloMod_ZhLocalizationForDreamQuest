@@ -297,6 +297,26 @@ namespace HelloMod
                                 typeof(ProfessionBaseOverride).GetMethod("AbilityDescriptionPostfix"));
             PostPatchVirtualMethodAndOverrides(harmony, typeof(ProfessionBase), "Description",
                                 typeof(ProfessionBaseOverride).GetMethod("DescriptionPostfix"));
+            //巨龙的特殊页面
+            PatchTargetPrefix(
+                typeof(ProfessionDragon).GetMethod("SmashPage"),
+                typeof(ProfessionBaseOverride).GetMethod("SmashPage"));
+            //巨龙的囤积能力
+            PatchTargetPrefix(
+                typeof(DungeonActionHoard).GetMethod("HoardPerform"),
+                typeof(DungeonActionOverride).GetMethod("DungeonActionHoard_HoardPerform"));
+            PatchTargetPrefix(
+                typeof(DungeonActionHoard).GetMethod("Perform"),
+                typeof(DungeonActionOverride).GetMethod("DungeonActionHoard_Perform"));
+            //地牢技能准备就绪
+            PatchTargetPrefix(
+                typeof(DungeonPlayer).GetMethod("CoolingDownAbilities"),
+                typeof(DungeonPlayerOverride).GetMethod("CoolingDownAbilities"));
+            //卡牌上的额外词条
+            PatchTargetPrefix(
+                typeof(Card).GetMethod("BuildKeywordString"),
+                typeof(CardOverride).GetMethod("BuildKeywordString"));
+
             //卡牌翻译 TODO
             /*PostPatchVirtualMethodAndOverrides(harmony, typeof(ActionCard), "PythonInitialize",
                                 typeof(HelloMod).GetMethod("Card_PythonInitialize_Postfix"));

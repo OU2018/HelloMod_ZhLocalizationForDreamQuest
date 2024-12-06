@@ -1,7 +1,9 @@
-﻿using System;
+﻿using HelloMod.DungeonFeatureGroup;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace HelloMod
 {
@@ -38,6 +40,22 @@ namespace HelloMod
         public static void GetPossibleNamesPostfix(ref string[] __result)
         {
             //TODO
+        }
+        //ProfessionDragon SmashPage 巨龙毁灭页面
+        public static bool SmashPage(ProfessionDragon __instance)
+        {
+            string text = HelloMod.Csv.GetTranslationByID("DungeonFeatureParagraph", "_SmashPage");
+            float x = __instance.dungeon.physical.WindowSize().x;
+            ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText(TR.GetStr("DungeonFeatureName", "Dragon Smash!"), 48, Color.black);
+            ShopDialogueText shopDialogueText = SDB.CenteredText(x, text, 32, Color.black);
+            SDB.Background(shopDialogueText);
+            ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueDynamicText, shopDialogueText }, "VP", 0.1f);
+            SDB.Background(shopDialogueAligned, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)));
+            SDB.CancelButton(shopDialogueAligned, __instance.dungeon.WindowBack);
+            shopDialogueAligned.UpperCenterTo(__instance.dungeon.ShopLocation());
+            __instance.dungeon.activeShop = shopDialogueAligned;
+            shopDialogueAligned.DoneBuilding();
+            return false;
         }
     }
 }
