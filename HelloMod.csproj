@@ -91,6 +91,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionBaseOverride.cs" />
     <Compile Include="CardOverride.cs" />
     <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />
@@ -140,6 +141,8 @@
     <Compile Include="ShopDialogueCardViewerOverride.cs" />
     <Compile Include="ShopDialogueTalentViewerOverride.cs" />
     <Compile Include="StringReplacePatcher.cs" />
+    <Compile Include="TargetFinderBaseOverride.cs" />
+    <Compile Include="TargetFinderLineOverride.cs" />
     <Compile Include="TemplateAttackCard.cs" />
     <Compile Include="TextboxFormatTextAnalize.cs" />
     <Compile Include="TranslationManager.cs" />

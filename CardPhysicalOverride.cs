@@ -115,7 +115,8 @@ namespace HelloMod
                 {
                     // 获取卡片类型字符串
                     string text = __instance.card.CardTypeString();
-
+                    //卡牌类型汉化
+                    text = TR.GetStr(TR.SK, text);
                     // 实例化 gameObject3
                     cardTypeGobj = (GameObject)UnityEngine.Object.Instantiate(__instance.textObjectSpecial);
 

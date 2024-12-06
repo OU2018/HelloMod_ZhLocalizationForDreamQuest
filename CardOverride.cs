@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace HelloMod
 {
@@ -263,6 +264,63 @@ namespace HelloMod
                 list.Add("<Influence>");
             }
             __result = string.Join(" ^, ", list.ToArray());
+            return false;
+        }
+
+        public static bool ChaosPrayer_PlayEffect(ChaosPrayer __instance)
+        {
+            __instance.PythonPlayEffect();
+            int num = __instance.game.InGameRandomRange(0, 3);
+            string text = string.Empty;
+            if (num == 0)
+            {
+                text = "Healing!";
+            }
+            else if (num == 1)
+            {
+                text = "Flame!";
+            }
+            else if (num == 2)
+            {
+                text = "Madness!";
+            }
+            else if (num == 3)
+            {
+                text = "Sloth!";
+            }
+            text = TR.GetStr(TR.SK, text);
+            if (__instance.IsPhysical())
+            {
+                __instance.game.physical.AddToVisualStackNoYield(__instance.physical, new object[]
+                {
+                text,
+                3,
+                Color.blue
+                }, "ScrollTextDurationColor");
+            }
+            if (num == 0)
+            {
+                __instance.Heal(5);
+            }
+            else if (num == 1)
+            {
+                if (__instance.IsPhysical())
+                {
+                    __instance.player.DealDamage(3, DamageTypes.FIRE, __instance.player);
+                }
+                else
+                {
+                    __instance.player.DealDamage(3, DamageTypes.FIRE, __instance.player.Enemy());
+                }
+            }
+            else if (num == 2)
+            {
+                __instance.ForceDiscard(2);
+            }
+            else if (num == 3)
+            {
+                __instance.LoseActions(2);
+            }
             return false;
         }
     }

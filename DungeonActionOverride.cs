@@ -56,7 +56,7 @@ namespace HelloMod
             return false;
         }
 
-        public static bool DungeonActionHoard_Perform(Tile t, DungeonActionHoard __instance)
+        public static bool DungeonActionDevour_Perform(Tile t, DungeonActionDevour __instance)
         {
             Monster monster = t.DestroyNormalMonster();
             t.Refresh();

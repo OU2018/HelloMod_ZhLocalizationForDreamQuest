@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using System.Linq;
 using HelloMod.DungeonFeatureGroup;
 using HelloMod.CombatAbilityGroup;
+using System.Text.RegularExpressions;
 
 namespace HelloMod
 {
@@ -21,7 +22,7 @@ namespace HelloMod
         public static CsvParagraphParser Csv = null;
 
         static Harmony harmony = null;
-        static Font loadFont = null;
+        public static Font loadFont = null;
         public static bool isLoadedFont = false;
 
         private readonly string jsonPath = $@"{Paths.PluginPath}\TransitionJSON";
@@ -306,8 +307,8 @@ namespace HelloMod
                 typeof(DungeonActionHoard).GetMethod("HoardPerform"),
                 typeof(DungeonActionOverride).GetMethod("DungeonActionHoard_HoardPerform"));
             PatchTargetPrefix(
-                typeof(DungeonActionHoard).GetMethod("Perform"),
-                typeof(DungeonActionOverride).GetMethod("DungeonActionHoard_Perform"));
+                typeof(DungeonActionDevour).GetMethod("Perform", new Type[] { typeof(Tile) }),
+                typeof(DungeonActionOverride).GetMethod("DungeonActionDevour_Perform"));
             //地牢技能准备就绪
             PatchTargetPrefix(
                 typeof(DungeonPlayer).GetMethod("CoolingDownAbilities"),
@@ -316,7 +317,14 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(Card).GetMethod("BuildKeywordString"),
                 typeof(CardOverride).GetMethod("BuildKeywordString"));
-
+            //斯芬克斯的能力，禁止xx卡牌
+            PatchTargetPrefix(
+                typeof(Game).GetMethod("SetTopMessage", new Type[] {typeof(string)}),
+                typeof(HelloMod).GetMethod("Game_SetTopMessage"));
+            //混乱祷告，卡牌
+            PatchTargetPrefix(
+                typeof(ChaosPrayer).GetMethod("PlayEffect"),
+                typeof(CardOverride).GetMethod("ChaosPrayer_PlayEffect"));
             //卡牌翻译 TODO
             /*PostPatchVirtualMethodAndOverrides(harmony, typeof(ActionCard), "PythonInitialize",
                                 typeof(HelloMod).GetMethod("Card_PythonInitialize_Postfix"));
@@ -496,6 +504,13 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(CardPhysical).GetMethod("RefreshTextBoxNow"),
                 typeof(CardPhysicalOverride).GetMethod("RefreshTextBoxNow"));
+
+            PatchTargetPrefix(
+                typeof(TargetFinderBase).GetMethod("BuildGUI"),
+                typeof(TargetFinderBaseOverride).GetMethod("BuildGUI"));
+            PatchTargetPrefix(
+                typeof(TargetFinderLine).GetMethod("OnGUI"),
+                typeof(TargetFinderLineOverride).GetMethod("OnGUI"));
             //CheatMenu 运行时补丁
             var cheatMenuMethod = typeof(DungeonPhysical).GetMethod("CheatMenu", BindingFlags.Public | BindingFlags.Instance);
             var cheatMenuDict = new Dictionary<string, string> { 
@@ -517,6 +532,8 @@ namespace HelloMod
             //DungeonFeature DisplayInMini 中一般包含按钮 TODO，寻找 DungeonFeature子类，分别进行补丁？
             DungeonFeaturePatch();
             CombatAbilityPatch();
+            //战斗中进行选择
+            ActionBaseOverride.ActionPatch(harmony, this);
             //1.完善LevelUpRewardDescription 表格，比如添加其对 DungeonAbility等特殊关键词的引用，特别是 Channel 能力。
 
 
@@ -971,6 +988,31 @@ namespace HelloMod
             shopDialogueAligned.UpperCenterTo(__instance.dungeon.ShopLocation());
             __instance.dungeon.activeShop = shopDialogueAligned;
             shopDialogueAligned.DoneBuilding();
+        }
+
+        public static bool Game_SetTopMessage(ref string s)
+        {
+            //对要显示的信息进行处理
+            if (!DreamQuestConfig.IsEn)
+            {
+                // 正则表达式匹配-斯芬克斯的显示信息，禁止某一类型的卡牌
+                string pattern = @"I forbid (\w+) cards!";
+                Regex regex = new Regex(pattern);
+
+                Match match = regex.Match(s);
+
+                if (match.Success)
+                {
+                    string value = match.Groups[1].Value;  // 获取捕获的值 禁止的卡牌类型
+                    string valueTrans = TR.GetStr(TR.SK, value);
+                    s = TR.GetStr(DungeonPhysicalOverride.TableKey, "forbidMsg").Replace(TR.PlaceHolder, valueTrans);
+                }
+                else//其他信息，比如法则
+                {
+
+                }
+            }
+            return true;
         }
 
         public string url;
