@@ -25,6 +25,19 @@ namespace HelloMod.DungeonFeatureGroup
             HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "SigilDescription",
                   typeof(AltarOverride).GetMethod("SigilDescription"));
 
+            modCenter.PatchTargetPostfix(
+                  typeof(Altar).GetMethod("InitialQueryText"),
+                  typeof(AltarOverride).GetMethod("InitialQueryText"));
+            modCenter.PatchTargetPostfix(
+                  typeof(Altar).GetMethod("AcceptText"),
+                  typeof(AltarOverride).GetMethod("AcceptText"));
+
+            modCenter.PatchTargetPrefix(
+                  typeof(Altar).GetMethod("InvokeName"),
+                  typeof(AltarOverride).GetMethod("InvokeName"));
+            modCenter.PatchTargetPrefix(
+                  typeof(Altar).GetMethod("Investigate"),
+                  typeof(AltarOverride).GetMethod("Investigate"));
             modCenter.PatchTargetPrefix(
                   typeof(Altar).GetMethod("DisplayInMini"),
                   typeof(AltarOverride).GetMethod("DisplayInMini"));
@@ -46,30 +59,33 @@ namespace HelloMod.DungeonFeatureGroup
 
         public static void Hint(ref string __result, Altar __instance)
         {
-
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_" + __instance.GetType().ToString() + "_" + "hint");
         }
 
         public static void CarvedMessage(ref string __result, Altar __instance)
         {
-
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_" + __instance.GetType().ToString() + "_" + "carved");
         }
         public static void AcceptMessage(ref string __result, Altar __instance)
         {
-
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_" + __instance.GetType().ToString() + "_" + "accept");
         }
         public static void SigilDescription(ref string __result, Altar __instance)
         {
-
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_" + __instance.GetType().ToString() + "_" + "sigil");
         }
 
         public static void InitialQueryText(ref string __result, Altar __instance)
         {
-            __result = "A rough grey altar leans against the wall.  Dried blood cakes the cracked and pitted stone, obscured by a thin layer of dust.  Above, etched into the wall, sits a sigil, " + __instance.SigilDescription() + "  Beneath it is a carved message: \n " + __instance.CarvedMessage();
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_Altar_init")
+                .Replace("{sigil}", __instance.SigilDescription())
+                .Replace("{carved}", __instance.CarvedMessage())
+                ;
         }
 
         public static void AcceptText(ref string __result,Altar __instance)
         {
-            __result = "The sigil above the altar glows as you invoke its god's name. " + __instance.AcceptMessage();
+            __result = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_Altar_accept") + __instance.AcceptMessage();
         }
 
         public static bool DisplayInMini(Altar __instance)
@@ -108,9 +124,9 @@ namespace HelloMod.DungeonFeatureGroup
                 }
                 if (flag)
                 {
-                    text += "\n\nA faint memory tugs at your mind.  " + __instance.Hint();
+                    text += HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_Altar_hint_prefix") + __instance.Hint();
                 }
-                BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), text, "Invoke", __instance.InvokeName, true);
+                BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), text, TR.GetStr(_dungeonFeatureTableName, "Invoke"), __instance.InvokeName, true);
                 basicFeatureText.Build();
             }
             return false;
@@ -125,7 +141,7 @@ namespace HelloMod.DungeonFeatureGroup
                 dungeonUser.UseAltar(__instance.MyBoon());
             }
             __instance.dungeon.WindowBack();
-            BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), __instance.AcceptText(), "Ok", __instance.Finished, false);
+            BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), __instance.AcceptText(), TR.GetStr(_dungeonFeatureTableName, "Ok"), __instance.Finished, false);
             basicFeatureText.Build();
             __instance.dungeon.player.stats.VisitAltar();
             return false;

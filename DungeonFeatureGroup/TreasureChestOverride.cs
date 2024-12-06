@@ -35,7 +35,6 @@ namespace HelloMod.DungeonFeatureGroup
             __result = TR.GetStr(_dungeonFeatureTableName, "Treasure Chest", "TREASURE");
         }
 
-        // Token: 0x06001579 RID: 5497 RVA: 0x00063264 File Offset: 0x00061464
         public static bool DisplayInMini(TreasureChest __instance)
         {
             DungeonPlayerPhysical physical = __instance.dungeon.player.physical;
@@ -57,7 +56,6 @@ namespace HelloMod.DungeonFeatureGroup
             return false;
         }
 
-        // Token: 0x0600157A RID: 5498 RVA: 0x000633E0 File Offset: 0x000615E0
         public static void Open( TreasureChest __instance)
         {
             __instance.EnteringShop();

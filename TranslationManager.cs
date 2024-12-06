@@ -20,7 +20,7 @@ namespace HelloMod
     }
     public class TranslationManager
     {
-        public static bool AutoAdd = false;
+        public static bool AutoAdd = true;
 
         private static Dictionary<string, List<TranslationEntry>> translations = new Dictionary<string, List<TranslationEntry>>();
         public static void Initialize()

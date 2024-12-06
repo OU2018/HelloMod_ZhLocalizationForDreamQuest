@@ -131,7 +131,7 @@ namespace HelloMod.DungeonFeatureGroup
             }
             else
             {
-                BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), __instance.InitialQueryText() + " \\n " + __instance.LikeDislikeSign(),
+                BasicFeatureText basicFeatureText = new BasicFeatureText(__instance.dungeon, __instance.Name(), __instance.InitialQueryText() + " \n " + __instance.LikeDislikeSign(),
                     TR.GetStr(_dungeonFeatureTableName, "Ok ({value} Left)").Replace(TR.PlaceHolder, __instance.usesLeft.ToString())
                     ,
                     __instance.Brainsuck, true);

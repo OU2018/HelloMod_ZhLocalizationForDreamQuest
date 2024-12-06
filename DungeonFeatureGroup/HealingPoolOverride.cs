@@ -36,7 +36,7 @@ namespace HelloMod.DungeonFeatureGroup
 
         public static void GenerateText(HealingPool __instance)
         {
-            __instance.text = HelloMod.Csv.GetTranslationByID("DungeonFeatureParagraph", "_healingpool_content");
+            __instance.text = HelloMod.Csv.GetTranslationByID(_dungeonFeaturePragraphTableName, "_healingpool_content");
         }
 
         public static bool DisplayInMini(HealingPool __instance)
