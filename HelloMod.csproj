@@ -107,6 +107,7 @@
     <Compile Include="DungeonFeatureGroup\BlacksmithOverride.cs" />
     <Compile Include="DungeonFeatureGroup\BrainsuckerOverride.cs" />
     <Compile Include="DungeonFeatureGroup\DungeonFeaturePatch.cs" />
+    <Compile Include="DungeonFeatureGroup\DungeonPlayerOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealingPoolOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealthPackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\LevelStartOverride.cs" />
