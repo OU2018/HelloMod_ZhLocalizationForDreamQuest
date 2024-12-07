@@ -31,6 +31,9 @@ namespace HelloMod
 
         public static bool RandomName_Not_Contain_Translation = true;//混合显示的情况下，随机卡牌名不会包含译文
 
+        public static bool UsePlayerNameTransition = true;//是否使用玩家名字的翻译（对局内的名字）
+
+
         public static bool IsZh { get { return CurrentLang == "zh"; } }
         public static bool IsEn { get { return CurrentLang == "en"; } }//一般用来判断是否执行原方法
     }

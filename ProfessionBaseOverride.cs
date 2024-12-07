@@ -35,9 +35,18 @@ namespace HelloMod
             }
         }
         //名字留到最后，考虑是否进行修改
-        public static void GetPossibleNamesPostfix(ref string[] __result)
+        public static bool GenerateName(ref string __result, ProfessionBase __instance)
         {
-            //TODO
+            if (!DreamQuestConfig.IsEn && DreamQuestConfig.UsePlayerNameTransition)
+            {
+                string[] possibleNames = __instance.GetPossibleNames();
+                string professionName = __instance.GetType().ToString();
+                int num = Game.RandomRange(0, possibleNames.Length - 1);
+                __result = HelloMod.Csv.GetTranslationByID("ProfessionNames", "_" + professionName + "_" + num);
+                //HelloMod.mLogger.LogMessage("Generate Name:" + __result);
+                return false;
+            }
+            return true;
         }
     }
 }

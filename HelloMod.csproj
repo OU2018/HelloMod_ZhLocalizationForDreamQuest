@@ -117,7 +117,7 @@
     <Compile Include="DungeonFeatureGroup\TreasureChestOverride.cs" />
     <Compile Include="DungeonOverride.cs" />
     <Compile Include="DungeonPhysicalOverride.cs" />
-    <Compile Include="DungeonPlayerOverride.cs" />
+    <Compile Include="DungeonPlayerPhysicalOverride.cs" />
     <Compile Include="DungeonStatsOverride.cs" />
     <Compile Include="DungeonUserOverride.cs" />
     <Compile Include="FormatTextTranpiler.cs" />
