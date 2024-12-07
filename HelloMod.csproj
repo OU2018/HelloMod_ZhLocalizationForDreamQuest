@@ -133,6 +133,7 @@
     <Compile Include="LevelUpRewardOverride.cs" />
     <Compile Include="LordlyDecreesOverride.cs" />
     <Compile Include="MonsterOverride.cs" />
+    <Compile Include="MonsterDetailOverride\GoblinMechanistOverride.cs" />
     <Compile Include="ReplaceStringPatch.cs" />
     <Compile Include="SDBOverride.cs" />
     <Compile Include="ShopDialogueBestiaryOverride.cs" />

@@ -12,6 +12,7 @@ using System.Linq;
 using HelloMod.DungeonFeatureGroup;
 using HelloMod.CombatAbilityGroup;
 using System.Text.RegularExpressions;
+using HelloMod.MonsterDetailOverride;
 
 namespace HelloMod
 {
@@ -332,6 +333,10 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(DungeonPlayer).GetMethod("CoolingDownAbilities"),
                 typeof(DungeonPlayerOverride).GetMethod("CoolingDownAbilities"));
+            //哥布林机械师
+            PatchTargetPrefix(
+                typeof(GoblinMechanist).GetMethod("StartTurn",new Type[] {typeof(Player)}),
+                typeof(GoblinMechanistOverride).GetMethod("StartTurn"));
             //卡牌上的额外词条
             PatchTargetPrefix(
                 typeof(Card).GetMethod("BuildKeywordString"),
