@@ -91,6 +91,18 @@ namespace HelloMod
                 typeof(CardPhysicalOverride).GetMethod("FormatTextOverride"));
                 var CardPhysicalFormatTextMethod = typeof(CardPhysical).GetMethod("FormatText", BindingFlags.Public | BindingFlags.Instance);
                 ReplaceStringPatch.PatchMethodWithTranspiler_In_CardPhysical(CardPhysicalFormatTextMethod);
+
+                //角色名字 翻译
+                PatchTargetPrefix(
+                      typeof(ProfessionBase).GetMethod("GenerateName"),
+                      typeof(ProfessionBaseOverride).GetMethod("GenerateName"));
+
+                PatchTargetPostfix(
+                    typeof(DungeonPlayerPhysical).GetMethod("LevelString"),
+                    typeof(DungeonPlayerPhysicalOverride).GetMethod("LevelString"));
+                PatchTargetPostfix(
+                    typeof(DungeonPlayer).GetMethod("GetName"),
+                    typeof(DungeonPlayerPhysicalOverride).GetMethod("DungeonPlayer_GetName"));
             }
             catch (Exception ex)
             {
@@ -624,8 +636,9 @@ namespace HelloMod
             bool mixCardName = parser.GetBool("Features", "MixCardName", false);
             bool cmdtot = parser.GetBool("Features", "CardViewer_Mainly_display_the_original_text", false);
             bool rnct = parser.GetBool("Features", "RandomName_Not_Contain_Translation", true);
-            int maxPlayers = parser.GetInt("Settings", "MaxPlayers", 4);
-            int gameSpeed = parser.GetInt("Settings", "GameSpeed", 1);
+            bool nameCover = parser.GetBool("Features", "UsePlayerNameTransition", true);
+            /*int maxPlayers = parser.GetInt("Settings", "MaxPlayers", 4);
+            int gameSpeed = parser.GetInt("Settings", "GameSpeed", 1);*/
             Logger.LogInfo(lang + "|" + coverFont + "|" + unlockAll);
             DreamQuestConfig.CurrentLang = lang;
             DreamQuestConfig.CoverFont = coverFont;
@@ -638,6 +651,7 @@ namespace HelloMod
             DreamQuestConfig.MixCardName = mixCardName;
             DreamQuestConfig.CardViewer_Mainly_display_the_original_text = cmdtot;
             DreamQuestConfig.RandomName_Not_Contain_Translation = rnct;
+            DreamQuestConfig.UsePlayerNameTransition = nameCover;
 
             if(DreamQuestConfig.IsZh)
             {
