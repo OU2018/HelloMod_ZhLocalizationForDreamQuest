@@ -94,6 +94,7 @@
     <Compile Include="ActionBaseOverride.cs" />
     <Compile Include="BrainsuckerPreferenceOverride.cs" />
     <Compile Include="CardOverride.cs" />
+    <Compile Include="ClipboardUtility.cs" />
     <Compile Include="DeckBuilderTopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />

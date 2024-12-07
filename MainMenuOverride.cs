@@ -1,19 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using BepInEx;
-using BepInEx.Unity.Mono;
 using UnityEngine;
-using HarmonyLib;
-using BepInEx.Logging;
-using HarmonyLib.Tools;
-using System.Runtime.CompilerServices;
-using System.IO;
-using System.Collections;
-using System.Reflection;
-using UnityEngine.UI;
-using UnityScript.Lang;
 using System.Linq;
+using BepInEx;
+
 namespace HelloMod
 {
     internal class MainMenuOverride
@@ -52,11 +42,12 @@ namespace HelloMod
             });
             shopDialogueButton4.FontSize(fontSize);
             ShopDialogueButton shopDialogueButton5 = SDB.BasicButton(vector, TR.GetStr(TableKey, "History"), ()=> {
-                ActionBaseOnLang(new Dictionary<string, Action>()
+                HistoryButton();
+                /*ActionBaseOnLang(new Dictionary<string, Action>()
                 {
                 {DreamQuestConfig.EN,  __instance.HistoryButton},
                 {DreamQuestConfig.ZH,  HistoryButton},
-                });
+                });*/
             });
             shopDialogueButton5.FontSize(fontSize);
             ShopDialogueAligned shopDialogueAligned2 = SDB.Align(new ShopDialogueButton[] { shopDialogueButton4, shopDialogueButton5 }, "HP", 0.2f);
@@ -320,9 +311,15 @@ namespace HelloMod
                  return MainMenu.instance.CanReplay(sh);
                 });
             ShopDialogueButton shopDialogueButton2 = SDB.BasicButton(new Vector2(2f, 0.5f), TR.GetStr(TableKey, "Enter Code"), EnterCodeButton);
+            ShopDialogueButton sdb_copy_code = SDB.BasicButton(new Vector2(2f, 0.5f), TR.GetStr(TableKey, "Copy Code"), () => {
+                CopyCodeButton(sh);
+            }, () => {
+                return MainMenu.instance.CanReplay(sh);
+            });
             shopDialogueButton.FontSize(32);
             shopDialogueButton2.FontSize(32);
-            ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueButton[2] { shopDialogueButton, shopDialogueButton2 }, "HP", 2f);
+            sdb_copy_code.FontSize(32);
+            ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueButton[3] { shopDialogueButton, shopDialogueButton2,sdb_copy_code }, "HP", 2f);
             //TODO:考虑这个翻译的具体意思
             ShopDialogueText shopDialogueText = SDB.Text(9f, TR.GetStr(TableKey, "Replayed games do not earn achievements."), 24, Color.black);
             shopDialogueAligned = SDB.Align(new ShopDialogueObject[2] { shopDialogueAligned, shopDialogueText }, "VP", 0.3f);
@@ -369,6 +366,26 @@ namespace HelloMod
             }
         }
 
+        public static void CopyCodeButton(ShopDialogueHistoryViewer h)
+        {
+            //弹出询问框，询问玩家确认进行复制吗？将会覆盖当前剪贴板的内容
+            if (!ClipboardUtility.GetFromClipboard().IsNullOrWhiteSpace())
+            {
+                currentGame.DestroyActiveShopNow();
+                ShopDialogueObject shopDialogueObject = SDB.ModalDialogue(new Vector2(8f, 2f), HelloMod.Csv.GetTranslationByID("UIextra", DreamQuestConfig.CurrentLang, "_copy_code") + "\n" + h.GetActiveHistory().code, new string[2] { TR.GetStr(TableKey, "Copy to clipboard"), TR.GetStr(TableKey, "Cancel", "DUNGEON") }, (choice) =>
+                {
+                    ModalHandlerCopyCode(choice, h.GetActiveHistory().code);
+                }
+                    );
+                shopDialogueObject.UpperCenterTo(new Vector3(0f, 2f, 6f));
+                currentGame.activeShop = shopDialogueObject;
+            }
+            else
+            {
+                CopyCode(h.GetActiveHistory().code);
+            }
+        }
+
         public static void EnterReplayString()
         {
             currentGame.DestroyActiveShopNow();
@@ -395,12 +412,21 @@ namespace HelloMod
             {
                 return shopDialogueTextInput.text.text.Length > 0;
             });
+            //将剪贴板的内容粘贴到输入框中
+            ShopDialogueButton pasteBtn = SDB.BasicButton(new Vector2(1.3f, 0.4f), TR.GetStr(TableKey, "Paste"), () =>
+            {
+                PasteCode(shopDialogueTextInput);
+            }, () =>
+            {
+                return !ClipboardUtility.GetFromClipboard().IsNullOrWhiteSpace();
+            });
+            ShopDialogueAligned sdAlign = SDB.Align(new ShopDialogueObject[2] { shopDialogueButton, pasteBtn }, "HP", 0.1f);
             //更新字体 中文时字号需要变大
 
             shopDialogueButton.FontSize(DreamQuestConfig.IsZh ?  36 : shopDialogueButton.text.fontSize);
             ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueDynamicText[2] { shopDialogueDynamicText, shopDialogueDynamicText2 }, "VP", 0.1f);
             shopDialogueAligned = SDB.Align(new ShopDialogueObject[2] { shopDialogueAligned, shopDialogueTextInput }, "VP", 0.1f);
-            shopDialogueAligned = SDB.Align(new ShopDialogueObject[2] { shopDialogueAligned, shopDialogueButton }, "VP", 0.1f);
+            shopDialogueAligned = SDB.Align(new ShopDialogueObject[2] { shopDialogueAligned, sdAlign }, "VP", 0.1f);
             SDB.Background(shopDialogueAligned, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)), Color.black);
             SDB.CancelButton(shopDialogueAligned, currentGame.DestroyActiveShopNow);
             if (GameManager.IsIPhone())
@@ -491,6 +517,30 @@ namespace HelloMod
             {
                 __result = TR.GetStr("ReplayErrorMessage", __result);
             }
+        }
+
+        public static void ModalHandlerCopyCode(int x,string s)
+        {
+            currentGame.DestroyActiveShopNow();
+            if(x == 0)
+            {
+                CopyCode(s);
+                return;
+            }
+
+            if(x != 1)
+            {
+
+            }
+        }
+
+        public static void CopyCode(string s) { 
+            ClipboardUtility.CopyToClipboard(s);
+        }
+
+        public static void PasteCode(ShopDialogueTextInput input)
+        {
+            input.text.text += ClipboardUtility.GetFromClipboard();
         }
     }
 }
