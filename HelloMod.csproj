@@ -119,6 +119,7 @@
     <Compile Include="DungeonFeatureGroup\StairOverride.cs" />
     <Compile Include="DungeonFeatureGroup\TavernOverride.cs" />
     <Compile Include="DungeonFeatureGroup\ThroneOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\TrapOverride.cs" />
     <Compile Include="DungeonFeatureGroup\TreasureChestOverride.cs" />
     <Compile Include="DungeonOverride.cs" />
     <Compile Include="DungeonPhysicalOverride.cs" />

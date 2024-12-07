@@ -598,6 +598,7 @@ namespace HelloMod
                 new MushroomPatchOverride(),
                 new BrainsuckerOverride(),
                 new TavernOverride(),
+                new TrapOverride(),
             };
             foreach (DungeonFeaturePatch patch in patches)
             {
