@@ -8,6 +8,28 @@ namespace HelloMod
 {
     internal class SDBOverride
     {
+        //地牢技能的点击和取消
+        public static bool ActionButton(ref ShopDialogueSwappable __result,Vector2 size, DungeonAction a)
+        {
+            ShopDialogueButton shopDialogueButton = SDB.BasicButton(size, string.Empty, a.OnClick, a.IsValid);
+            if (GameManager.IsIPhone())
+            {
+                shopDialogueButton.ColliderMod((float)1, 0.8f);
+            }
+            ShopDialogueDynamicText shopDialogueDynamicText = SDB.DynamicText(a.ButtonName(), 24, Color.white);
+            ShopDialogueButton shopDialogueButton2 = SDB.BasicButton(size, TR.GetStr(DungeonPhysicalOverride.TableKey, "Cancel"), a.Cancel);
+            shopDialogueButton2.FontSize(24);
+            ShopDialogueFillBar shopDialogueFillBar = SDB.FillBar(size, new Color(0.5058824f, 0.4117647f, 0.25490198f));
+            shopDialogueFillBar.SetBackground(false);
+            shopDialogueFillBar.AddFillFunction(a.CooldownPercent);
+            shopDialogueFillBar.TieToButton(shopDialogueButton);
+            ShopDialogueAligned shopDialogueAligned = SDB.Center(new ShopDialogueObject[] { shopDialogueButton, shopDialogueFillBar, shopDialogueDynamicText });
+            ShopDialogueSwappable shopDialogueSwappable = SDB.Swappable(new ShopDialogueObject[] { shopDialogueAligned, shopDialogueButton2 });
+            a.button = shopDialogueSwappable;
+            __result = shopDialogueSwappable;
+            return false;
+        }
+
         //战斗中右下角的技能显示
         public static bool ActionIconDescription(ref ShopDialogueObject __result, ActionBase a, string text, bool good)
         {

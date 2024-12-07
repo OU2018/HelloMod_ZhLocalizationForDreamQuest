@@ -92,7 +92,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionBaseOverride.cs" />
+    <Compile Include="BrainsuckerPreferenceOverride.cs" />
     <Compile Include="CardOverride.cs" />
+    <Compile Include="DeckBuilderTopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityNormalPatch.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="DungeonFeatureGroup\ShopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\SmoothieShackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\StairOverride.cs" />
+    <Compile Include="DungeonFeatureGroup\TavernOverride.cs" />
     <Compile Include="DungeonFeatureGroup\ThroneOverride.cs" />
     <Compile Include="DungeonFeatureGroup\TreasureChestOverride.cs" />
     <Compile Include="DungeonOverride.cs" />

@@ -197,7 +197,14 @@ namespace HelloMod
             PatchTargetPostfix(
                                 typeof(Monster).GetMethod("Defeated"),
                                 typeof(MonsterOverride).GetMethod("DefeatedPostfix"));
-
+            //希尔迪博士的快乐屋，喜欢的字符串，调整
+            PatchTargetPostfix(
+                 typeof(BrainsuckerPreference).GetMethod("LikeString"),
+                 typeof(BrainsuckerPreferenceOverride).GetMethod("LikeString"));
+            //Decree string
+            PatchTargetPostfix(
+                 typeof(Decree).GetMethod("DecreeString"),
+                 typeof(DecreeOverride).GetMethod("DecreeString_Postfix"));
             //战斗中弃牌
             PatchTargetPostfix(
                 typeof(ActionDiscard).GetMethod("SetTargetFinderParameters"),
@@ -423,6 +430,9 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(MainMenu).GetMethod("Initialize"),
                 typeof(MainMenuOverride).GetMethod("InitializeOverride"));
+            PatchTargetPrefix(
+                typeof(MainMenu).GetMethod("BuildCachedClassPickerDialogue"),
+                typeof(MainMenuOverride).GetMethod("BuildCachedClassPickerDialogue"));
             //DungeonPhysical 重载(翻译 + 作弊按钮)==>UI
             PatchTargetPrefix(
                 typeof(DungeonPhysical).GetMethod("InGameMenu"),
@@ -478,6 +488,14 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(SDB).GetMethod("ActionIconDescription"),
                 typeof(SDBOverride).GetMethod("ActionIconDescription"));
+            //地牢技能 Cancel TODO：后续可以考虑地牢的buttonName的翻译搬运到此处
+            PatchTargetPrefix(
+                typeof(SDB).GetMethod("ActionButton"),
+                typeof(SDBOverride).GetMethod("ActionButton"));
+            //开始界面的载入中汉化 Loading...
+            PatchTargetPrefix(
+                typeof(DeckBuilderTop).GetMethod("OnGUI"),
+                typeof(DeckBuilderTopOverride).GetMethod("OnGUI"));
             //Infoblock重载
             PatchTargetPrefix(
                 typeof(Infoblock).GetMethod("RestartBlock"),
@@ -579,6 +597,7 @@ namespace HelloMod
                 new MushroomOverride(),
                 new MushroomPatchOverride(),
                 new BrainsuckerOverride(),
+                new TavernOverride(),
             };
             foreach (DungeonFeaturePatch patch in patches)
             {
@@ -1009,11 +1028,21 @@ namespace HelloMod
                 }
                 else//其他信息，比如法则
                 {
+                    if(s.StartsWith("Dance Puppet!"))
+                    {
+                        //Player PuppetString
+                        s = TR.GetStr(DungeonPhysicalOverride.TableKey, "puppetMsg").Replace("\\n", "\n");
+                    }
+                    else
+                    {
 
+                    }
                 }
             }
             return true;
         }
+
+
 
         public string url;
         public int version;

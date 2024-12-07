@@ -117,13 +117,13 @@ namespace HelloMod
             //先预存 构建角色页面
             if (HelloMod.isLoadedFont)
             {
-                BuildCachedClassPickerDialogue();
+                __instance.BuildCachedClassPickerDialogue();
             }
             else
             {
                 HelloMod.OnAfterFontLoaded += () =>
                 {
-                    BuildCachedClassPickerDialogue();
+                    __instance.BuildCachedClassPickerDialogue();
                 };
             }
             //播放音乐
@@ -206,7 +206,7 @@ namespace HelloMod
                 //TODO:如何实现全天赋的浏览器
         }
 
-        public static void BuildCachedClassPickerDialogue()
+        public static bool BuildCachedClassPickerDialogue()
         {
             Vector2 professionIconSize = new Vector2(11f, 9f);
 
@@ -259,6 +259,7 @@ namespace HelloMod
             shopDialogueObject2.CenterTo(new Vector3(0f, 0f, 4f));
             shopDialogueObject2.Disable();
             MainMenu.instance.cachedChoosePlayerDialogue = shopDialogueObject2;
+            return false;
         }
 
         public static void CreditsButton()

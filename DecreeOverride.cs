@@ -57,6 +57,7 @@ namespace HelloMod
                     text = "DO NOT play cards named '{value}'";
                 }
             }
+            text = HelloMod.Csv.GetTranslationByID("DecreeString", "_"+decreeType.ToString() + "_" + __instance.isLike).Replace(TR.PlaceHolder, __instance.strength.ToString());
             __result = text;
         }
     }

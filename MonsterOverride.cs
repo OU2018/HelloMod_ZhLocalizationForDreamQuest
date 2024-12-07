@@ -31,6 +31,7 @@ namespace HelloMod
 
             if (s.StartsWith("Yuck"))
             {
+                s = s.Replace("Yuck", TR.GetStr(TranslationManager.specialTableKey, "Yuck"));
                 __instance.dungeon.player.PlayerSpriteTextQueued(s, 3, Utility.darkRed);
             }
             else

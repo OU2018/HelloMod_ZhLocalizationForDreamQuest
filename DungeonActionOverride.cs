@@ -16,6 +16,14 @@ namespace HelloMod
                     __result = TR.GetStr("DungeonAction", "Hoard").Replace(TR.PlaceHolder, (__instance as DungeonActionHoard).Cost().ToString());
                 }
             }
+            else if (__instance.GetType() == typeof(DungeonActionSing))
+            {
+                if (!DreamQuestConfig.IsEn)
+                {
+                    DungeonActionSing singer = (DungeonActionSing) __instance;
+                    __result = TR.GetStr("SongName", singer.song.name);
+                }
+            }
             else
             {
                 __result = TR.GetStr("DungeonAction", __result);
