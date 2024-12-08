@@ -139,8 +139,9 @@ namespace HelloMod.DungeonFeatureGroup
                         AcquireFunction(__instance, shopDialogueCard.card, new ShopDialogueObject[]
                     {
                         array[recordIndex],
-                        shopDialogueButton
-                    });
+                        shopDialogueButton,
+                        
+                    }, array2);
                     }
                     catch (Exception ex) {
                         HelloMod.mLogger.LogError(ex);
@@ -164,13 +165,21 @@ namespace HelloMod.DungeonFeatureGroup
                 : TR.GetStr(DungeonPhysicalOverride.TableKey, "Free!");
         }
 
-        public static void AcquireFunction(SmoothieShack __instance,Card c, ShopDialogueObject[] so)
+        public static void AcquireFunction(SmoothieShack __instance,Card c, ShopDialogueObject[] so, ShopDialogueObject[] btns)
         {
             AcquireCard(c, __instance);
+            bool before = __instance.first;
             __instance.first = false;
-            HelloMod.mLogger.LogMessage("NameFunctionFactory||" + NameFunctionFactory(c, __instance));
-            for (int i = 0; i < so.Length; i++) { 
-                (so[i] as ShopDialogueButton).text.text = NameFunctionFactory(c, __instance);
+            if (before)
+            {
+                for (int i = 0; i < btns.Length; i++)
+                {
+                    (btns[i] as ShopDialogueButton).text.text = NameFunctionFactory(c, __instance);
+                }
+            }
+            else
+            {
+                (so[1] as ShopDialogueButton).text.text = NameFunctionFactory(c, __instance);
             }
         }
 
