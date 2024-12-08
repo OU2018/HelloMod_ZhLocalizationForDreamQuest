@@ -36,6 +36,7 @@ namespace HelloMod
             foreach (var path in tablePaths)
             {
                 string tableKey = Path.GetFileNameWithoutExtension(path);
+                HelloMod.mLogger.LogMessage("Log Table: " + tableKey);
                 try
                 {
                     var entries = LoadTable(path); // 加载单张表格的方法

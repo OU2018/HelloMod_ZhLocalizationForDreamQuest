@@ -152,6 +152,7 @@
     <Compile Include="TargetFinderLineOverride.cs" />
     <Compile Include="TemplateAttackCard.cs" />
     <Compile Include="TextboxFormatTextAnalize.cs" />
+    <Compile Include="TextureDict.cs" />
     <Compile Include="TranslationManager.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ActionOverride\" />
+    <Folder Include="ResourceUtils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

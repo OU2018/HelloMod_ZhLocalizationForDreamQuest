@@ -142,10 +142,13 @@ namespace HelloMod
                 foreach (var buff in __result)
                 {
                     PlayerAttributes attr = buff.att;
-                    if (attr == PlayerAttributes.MONSTER_COUNTER)//
+                    if (attr == PlayerAttributes.MONSTER_COUNTER)//怪物特殊词条
                     {
                         int value = buff.n;
                         buff.s = __instance.player.MonsterCounterString(value);
+                    }else if (attr == PlayerAttributes.ARCHMAGE)//咒术免费词条 TODO:Buff词条优化
+                    {
+
                     }
                     else
                     {

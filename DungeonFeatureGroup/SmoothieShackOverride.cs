@@ -169,7 +169,9 @@ namespace HelloMod.DungeonFeatureGroup
             AcquireCard(c, __instance);
             __instance.first = false;
             HelloMod.mLogger.LogMessage("NameFunctionFactory||" + NameFunctionFactory(c, __instance));
-            (so[1] as ShopDialogueButton).text.text = NameFunctionFactory(c, __instance);
+            for (int i = 0; i < so.Length; i++) { 
+                (so[i] as ShopDialogueButton).text.text = NameFunctionFactory(c, __instance);
+            }
         }
 
         public static void AcquireCard(Card c, SmoothieShack __instance)

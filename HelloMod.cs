@@ -21,6 +21,7 @@ namespace HelloMod
     {
         public static ManualLogSource mLogger = null;
         public static CsvParagraphParser Csv = null;
+        public static TextureDict textMgr = null;
 
         static Harmony harmony = null;
         public static Font loadFont = null;
@@ -30,6 +31,7 @@ namespace HelloMod
         private readonly string csvDir = $@"{Paths.PluginPath}\TransitionParagraph";
 
         public static Action OnAfterFontLoaded;
+        public static Action OnAfterTexLoaded;
         void Awake()
         {
             mLogger = new ManualLogSource("hellomod");
@@ -44,10 +46,12 @@ namespace HelloMod
             if(DreamQuestConfig.DontloadMod)
                 return;
             //载入资源 unity3d 资源包
-            url = $"file:///{Paths.PluginPath}\\myAssetBundle.unity3d";
-            version = 0;
-            StartCoroutine(LoadBundle());
+            font_url = $"file:///{Paths.PluginPath}\\fontPack.unity3d";
+            version = 2;
+            StartCoroutine(LoadFontBundle());
 
+            tex_url = $"file:///{Paths.PluginPath}\\texturePack.unity3d";
+            StartCoroutine(LoadTextureBundle());
             TranslationManager.Initialize();
 
 
@@ -104,6 +108,10 @@ namespace HelloMod
                 PatchTargetPostfix(
                     typeof(DungeonPlayer).GetMethod("GetName"),
                     typeof(DungeonPlayerPhysicalOverride).GetMethod("DungeonPlayer_GetName"));
+                //特殊的图片卡牌，覆盖
+                PatchTargetPostfix(
+                    typeof(MaterialManager).GetMethod("Fallback", BindingFlags.NonPublic|BindingFlags.Static),
+                    typeof(HelloMod).GetMethod("MaterialManager_Fallback"));
             }
             catch (Exception ex)
             {
@@ -349,6 +357,17 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(ChaosPrayer).GetMethod("PlayEffect"),
                 typeof(CardOverride).GetMethod("ChaosPrayer_PlayEffect"));
+            //额外回合字符串的显示
+            PatchTargetPrefix(
+                typeof(Haste).GetMethod("PlayEffect"),
+                typeof(CardOverride).GetMethod("Haste_PlayEffect"));
+            PatchTargetPrefix(
+                typeof(Storm).GetMethod("PlayEffect"),
+                typeof(CardOverride).GetMethod("Storm_PlayEffect"));
+
+            PatchTargetPostfix(
+                typeof(PenaltyExtraTurn).GetMethod("PenaltyString"),
+                typeof(CardOverride).GetMethod("PenaltyString"));
             //卡牌翻译 TODO
             /*PostPatchVirtualMethodAndOverrides(harmony, typeof(ActionCard), "PythonInitialize",
                                 typeof(HelloMod).GetMethod("Card_PythonInitialize_Postfix"));
@@ -834,10 +853,10 @@ namespace HelloMod
         //无效
         /*public void LoadAssetBundle()
         {
-            var ab = AssetBundle.CreateFromFile($"{Paths.PluginPath}/myAssetBundle.unity3d");
+            var ab = AssetBundle.CreateFromFile($"{Paths.PluginPath}/fontPack.unity3d");
             if( ab == null)
             {
-                Logger.LogInfo("无法正常载入AssetBundle：myAssetBundle.unity3d");
+                Logger.LogInfo("无法正常载入AssetBundle：fontPack.unity3d");
                 return;
             }
             
@@ -1062,19 +1081,37 @@ namespace HelloMod
             return true;
         }
 
-
-
-        public string url;
-        public int version;
-        public IEnumerator LoadBundle()
+        public static void MaterialManager_Fallback(Renderer r, string s)
         {
-            using (WWW www = WWW.LoadFromCacheOrDownload(url, version))
+            if (DreamQuestConfig.IsEn)
+                return;
+
+            if (s.Contains("Penalty"))
             {
-                base.Logger.LogInfo("尝试从 www 载入 " + url + "} {" + version + "}");
+                mLogger.LogMessage(s);
+                string k = s.Replace("Textures/", "");
+                Texture tex = textMgr.FindTextureByKey(k);
+                if (tex)
+                {
+                    r.material.mainTexture = tex;
+                }
+            }//TODO:其他卡牌卡面替换
+        }
+
+
+
+        public string font_url;
+        public int version;
+        //TODO:
+        public IEnumerator LoadFontBundle()
+        {
+            using (WWW www = WWW.LoadFromCacheOrDownload(font_url, version))
+            {
+                base.Logger.LogInfo("尝试从 www 载入 " + font_url + "} {" + version + "}");
                 yield return www;
-                if (System.IO.File.Exists(url)) base.Logger.LogInfo("文件存在AssetBundle：myAssetBundle.unity3d ！");
+                if (System.IO.File.Exists(font_url)) base.Logger.LogInfo("文件存在AssetBundle：fontPack.unity3d ！");
                 AssetBundle assetBundle = www.assetBundle;
-                base.Logger.LogInfo("成功载入AssetBundle：myAssetBundle.unity3d ！");
+                base.Logger.LogInfo("成功载入AssetBundle：fontPack.unity3d ！");
                 if (assetBundle == null)//此处为空
                 {
                     base.Logger.LogInfo("AssetBundle 为空！");
@@ -1109,7 +1146,51 @@ namespace HelloMod
                     }
                     else
                     {
-                        base.Logger.LogInfo("AssetBundle：myAssetBundle.unity3d  assetBundle.mainAsset 为空！");
+                        base.Logger.LogInfo("AssetBundle：fontPack.unity3d  assetBundle.mainAsset 为空！");
+                    }
+                }
+            }
+        }
+
+        public string tex_url;
+        public IEnumerator LoadTextureBundle()
+        {
+            using (WWW www = WWW.LoadFromCacheOrDownload(tex_url, version))
+            {
+                base.Logger.LogInfo("尝试从 www 载入 " + tex_url + "} {" + version + "}");
+                yield return www;
+                if (System.IO.File.Exists(tex_url)) base.Logger.LogInfo("文件存在AssetBundle：texturePack.unity3d ！");
+                AssetBundle assetBundle = www.assetBundle;
+                base.Logger.LogInfo("成功载入AssetBundle：texturePack.unity3d ！");
+                if (assetBundle == null)//此处为空
+                {
+                    base.Logger.LogInfo("AssetBundle 为空！");
+                }
+                else
+                {
+                    if (assetBundle.mainAsset != null)
+                    {
+                        GameObject gameObject = assetBundle.mainAsset as GameObject;
+
+                        GameObject instance = (GameObject)Instantiate(gameObject);
+                        assetBundle.Unload(false);
+                        mLogger.LogMessage(instance.name + "||child:" + instance.transform.childCount);
+
+                        GameObject gobj = instance;
+                        if (gobj != null)
+                        {
+                            gobj.SetActive(false);
+                            DontDestroyOnLoad(gobj);
+                            mLogger.LogMessage(gobj.name + "||child:" + gobj.transform.childCount);
+                            textMgr = new TextureDict(gobj);
+                            textMgr.GenerateArr();
+                            //textMgr.InitTextureDict();
+                            OnAfterTexLoaded?.Invoke();
+                        }
+                    }
+                    else
+                    {
+                        base.Logger.LogInfo("AssetBundle：texturePack.unity3d  assetBundle.mainAsset 为空！");
                     }
                 }
             }

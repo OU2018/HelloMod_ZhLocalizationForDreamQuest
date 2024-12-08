@@ -323,5 +323,50 @@ namespace HelloMod
             }
             return false;
         }
+
+        public static bool Haste_PlayEffect(Haste __instance)
+        {
+            __instance.PythonPlayEffect();
+            __instance.Draw(2);
+            float num = __instance.game.InGameRandomFloat();
+            if (num < 0.1f)
+            {
+                __instance.game.AddExtraTurn(__instance.player);
+                if (__instance.IsPhysical())
+                {
+                    __instance.game.physical.AddToVisualStackNoYield(__instance.physical, new object[]
+                    {
+                    TR.GetStr(TR.SK, "Extra Turn!"),
+                    3,
+                    Color.blue
+                    }, "ScrollTextDurationColor");
+                }
+            }
+            return false;
+        }
+        public static bool Storm_PlayEffect(Storm __instance)
+        {
+            __instance.PythonPlayEffect();
+            if (__instance.player.mana >= 30)
+            {
+                __instance.player.GainMana(-30);
+                __instance.game.AddExtraTurn(__instance.player);
+                if (__instance.IsPhysical())
+                {
+                    __instance.game.physical.AddToVisualStackNoYield(__instance.physical, new object[]
+                    {
+                    TR.GetStr(TR.SK, "Extra Turn!"),
+                    3,
+                    Color.blue
+                    }, "ScrollTextDurationColor");
+                }
+            }
+            return false;
+        }
+
+        public static void PenaltyString(ref string __result)
+        {
+            __result = TR.GetStr(TR.SK, "Extra Turn!");
+        }
     }
 }
