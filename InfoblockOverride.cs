@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using U3DXT.iOS.Native.Foundation;
 using UnityEngine;
 
 namespace HelloMod
@@ -138,7 +139,6 @@ namespace HelloMod
             // 匹配所有 <XX> 中的 XX 部分
             if (!DreamQuestConfig.IsEn)
             {
-                string pattern = @"<(\d+)>";//匹配 <>之间的数字
                 foreach (var buff in __result)
                 {
                     PlayerAttributes attr = buff.att;
@@ -148,32 +148,66 @@ namespace HelloMod
                         buff.s = __instance.player.MonsterCounterString(value);
                     }else if (attr == PlayerAttributes.ARCHMAGE)//咒术免费词条 TODO:Buff词条优化
                     {
-
+                        if(__instance.freeSpellTurn > 0)
+                        {
+                            buff.s = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr + "_TURN");
+                        }
+                        else
+                        {
+                            string beforeReplace = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr);
+                            buff.s = ReplaceNumberInsideStr(buff.s, beforeReplace, buff.n);
+                        }
+                    }
+                    else if (attr == PlayerAttributes.TEMP_SPELL_REDUCE)//回复生命和减少咒术，不知道为啥用同一个枚举
+                    {
+                        string beforeReplace = string.Empty;
+                        if (buff.s.Contains("mana"))
+                        {
+                            beforeReplace = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr + "_MANA");
+                        }
+                        else
+                        {
+                            beforeReplace = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr + "_HEALTH");
+                        }
+                        buff.s = ReplaceNumberInsideStr(buff.s, beforeReplace, buff.n);
+                    }
+                    else if (attr == PlayerAttributes.ELEMENTAL_FORM)//属性攻击
+                    {
+                        buff.s = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr + "_" + __instance.elementalForm);
                     }
                     else
                     {
                         int value = buff.n;
                         string content = buff.s;
                         string beforeReplace = string.Empty;
-                        // 创建正则表达式对象
-                        Regex regex = new Regex(pattern);
-
-                        // 获取所有匹配的内容
-                        MatchCollection matches = regex.Matches(content);
                         //原始字符串
                         beforeReplace = HelloMod.Csv.GetTranslationByID("PlayerEffectDescription", "_" + attr);
-                        if (matches.Count > 0) {
-                            string replaceValue = matches[0].Groups[1].Value;
-                            buff.s = beforeReplace.Replace("{value}", replaceValue);
-                        }else if(value == 0)
-                        {
-                            string replaceValue = "1";
-                            buff.s = beforeReplace.Replace("{value}", replaceValue);
-                        }
+                        buff.s = ReplaceNumberInsideStr(content, beforeReplace, value);
                     }
                 }
-            
             }
+        }
+
+        public static string ReplaceNumberInsideStr(string origin,string target,int value)
+        {
+            string result = string.Empty;
+            string pattern = @"<(\d+)>";//匹配 <>之间的数字
+                                        // 创建正则表达式对象
+            Regex regex = new Regex(pattern);
+
+            // 获取所有匹配的内容
+            MatchCollection matches = regex.Matches(origin);
+            if (matches.Count > 0)
+            {
+                string replaceValue = matches[0].Groups[1].Value;
+                result = target.Replace("{value}", replaceValue);
+            }
+            else if (value == 0)
+            {
+                string replaceValue = "1";
+                result = target.Replace("{value}", replaceValue);
+            }
+            return result;
         }
 
         public static bool EscapePhysical(int x, Infoblock __instance)
