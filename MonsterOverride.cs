@@ -81,7 +81,9 @@ namespace HelloMod
                     )
                 {
 
-                }else if (__instance.GetType() == typeof(Ghost))
+                }else if (__instance.GetType() == typeof(Ghost)
+                    || __instance.GetType() == typeof(EarthElemental)
+                    )//有数字内容需要进行替换的
                 {
                     string pattern = @"(\d+)";//匹配数字
                                               // 创建正则表达式对象
@@ -90,7 +92,28 @@ namespace HelloMod
                     // 获取所有匹配的内容
                     MatchCollection matches = regex.Matches(__result);
                     if (matches.Count > 0) {
-                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_Ghost").Replace(TR.PlaceHolder, matches[0].Value);
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + __instance.GetType().ToString()).Replace(TR.PlaceHolder, matches[0].Value);
+                    }
+                }else if (__instance.GetType() == typeof(UssuriWarQueen))//女皇需要根据等级变化
+                {
+                    if(__instance.level >= 5)
+                    {
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + __instance.GetType().ToString() + "_5");
+                    }
+                    else
+                    {
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + __instance.GetType().ToString());
+                    }
+                }
+                else if (__instance.GetType() == typeof(UssuriTrickster))//猫妖系列的怪物，在ApplyToPlayer里似乎会覆盖monsterPower，TODO
+                {
+                    if(__instance.GetType() == typeof(UssuriTrickster))
+                    {
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_" + __instance.GetType().ToString());
+                    }
+                    else
+                    {
+                        __result = HelloMod.Csv.GetTranslationByID("MonsterMPowers", "_Ussuri");
                     }
                 }
                 else
