@@ -83,9 +83,15 @@ namespace HelloMod.DungeonFeatureGroup
                 ShopDialogueText shopDialogueText = SDB.Text(x, __instance.text, 32 + num, Color.black);
                 SDB.Background(shopDialogueText);
                 ShopDialogueButton shopDialogueButton = SDB.BasicButton(__instance.dungeon.physical.DefaultButtonSize() * 1.2f, TR.GetStr(DungeonPhysicalOverride.TableKey, "Heal (") + __instance.HealCost() + TR.GetStr(DungeonPhysicalOverride.TableKey, " Gold)"), __instance.Heal, __instance.CanAffordHeal);
-                ShopDialogueButton shopDialogueButton2 = SDB.BasicButton(__instance.dungeon.physical.DefaultButtonSize() * 1.2f, GenerateFullHealName(__instance), __instance.FullHeal,__instance.CanAffordFullHeal);
+                ShopDialogueButton shopDialogueButton2 = SDB.BasicButton(__instance.dungeon.physical.DefaultButtonSize() * 1.2f, GenerateFullHealName(__instance), null
+                    , __instance.CanAffordFullHeal);
                 ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueButton[] { shopDialogueButton, shopDialogueButton2 }, "HP", (float)2);
                 ShopDialogueAligned shopDialogueAligned2 = SDB.Align(new ShopDialogueObject[] { shopDialogueDynamicText, shopDialogueText }, "VP", 0.1f);
+
+                shopDialogueButton2.SetCallback(() =>
+                {
+                    Handler_FullHeal(__instance, shopDialogueButton2);
+                });
                 shopDialogueAligned2 = SDB.Align(new ShopDialogueAligned[] { shopDialogueAligned2, shopDialogueAligned }, "VP", 0.4f);
                 SDB.Background(shopDialogueAligned2, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)));
                 SDB.CancelButton(shopDialogueAligned2, __instance.dungeon.WindowBack);
@@ -97,12 +103,20 @@ namespace HelloMod.DungeonFeatureGroup
             return false;
         }
 
+        public static void Handler_FullHeal(HealingPool __instance, ShopDialogueButton btn)
+        {
+            __instance.FullHeal();
+            //更新按钮
+            btn.text.text = GenerateFullHealName(__instance);
+        }
+
         public static string FullHealName(HealingPool __instance)
         {
             return (!__instance.first) ? (__instance.FullHealCost() + TR.GetStr(DungeonPhysicalOverride.TableKey, " Gold")) : TR.GetStr(DungeonPhysicalOverride.TableKey, "Free!");
         }
         public static string GenerateFullHealName(HealingPool __instance)
         {
+            HelloMod.mLogger.LogMessage("Is Continue Call?");
 		    return TR.GetStr(DungeonPhysicalOverride.TableKey, "Heal Max (") + FullHealName(__instance) + ")";
 	    }
     }

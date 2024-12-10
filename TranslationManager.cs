@@ -102,6 +102,10 @@ namespace HelloMod
                 {
                     if (AutoAdd)
                     {
+                        if (string.IsNullOrEmpty(str))
+                        {
+                            return str;
+                        }
                         string filePath = Path.Combine(dirPath, tableKey + ".csv");
                         using (StreamWriter writer = new StreamWriter(filePath, true))
                         {
