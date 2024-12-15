@@ -120,7 +120,7 @@ namespace HelloMod.DungeonFeatureGroup
                     if (shopDialogueCard.card is BonusCard)
                     {
                         string sddtText = shopDialogueCard.card.cardName;
-                        if (!string.IsNullOrEmpty(sddtText))
+                        if (!string.IsNullOrEmpty(sddtText) && !TextboxFormatTextAnalize.ContainsChinese(sddtText))
                         {
                             // 使用正则表达式提取所有数字
                             Regex regex = new Regex(@"\d+");

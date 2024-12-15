@@ -364,6 +364,10 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(Storm).GetMethod("PlayEffect"),
                 typeof(CardOverride).GetMethod("Storm_PlayEffect"));
+            //马哈马特，卡牌
+            PatchTargetPrefix(
+                typeof(Mahamat).GetMethod("PlayEffect"),
+                typeof(CardOverride).GetMethod("Mahamat_PlayEffect"));
 
             PatchTargetPostfix(
                 typeof(PenaltyExtraTurn).GetMethod("PenaltyString"),
@@ -607,6 +611,7 @@ namespace HelloMod
         {
             List<CombatAbilityPatch> patches = new List<CombatAbilityPatch>() {
                 new CombatAbilityOverride(),
+                new CombatAbilityDesperatePrayerOverride(),
             };
             foreach (CombatAbilityPatch patch in patches)
             {
@@ -1098,6 +1103,11 @@ namespace HelloMod
             }//TODO:其他卡牌卡面替换
         }
 
+        public static void CardList_GetCardListPostfix(CardList __instance)
+        {
+            CardList.cardList.Add(new CardData("HealingPotion", new PreferenceWrapper[0], 7, new UserAttribute[0], false, null, (float)3, (float)3, (float)3, (float)3, 2, 3, "ActionCard", DamageTypes.NONE, "Healing Potion"));//向全卡牌列表中添加数据
+            CardList.allCards.Add("");//
+        }
 
 
         public string font_url;

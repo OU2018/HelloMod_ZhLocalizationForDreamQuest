@@ -95,6 +95,7 @@
     <Compile Include="BrainsuckerPreferenceOverride.cs" />
     <Compile Include="CardOverride.cs" />
     <Compile Include="ClipboardUtility.cs" />
+    <Compile Include="CombatAbilityGroup\CombatAbilityDesperatePrayerOverride.cs" />
     <Compile Include="DeckBuilderTopOverride.cs" />
     <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />
@@ -132,6 +133,8 @@
     <Compile Include="InfoblockOverride.cs" />
     <Compile Include="LevelUpRewardOverride.cs" />
     <Compile Include="LordlyDecreesOverride.cs" />
+    <Compile Include="ModFeature\DungeonActionRandomAlchemy.cs" />
+    <Compile Include="ModFeature\TemplatePotion.cs" />
     <Compile Include="MonsterOverride.cs" />
     <Compile Include="MonsterDetailOverride\GoblinMechanistOverride.cs" />
     <Compile Include="ReplaceStringPatch.cs" />
@@ -150,7 +153,7 @@
     <Compile Include="StringReplacePatcher.cs" />
     <Compile Include="TargetFinderBaseOverride.cs" />
     <Compile Include="TargetFinderLineOverride.cs" />
-    <Compile Include="TemplateAttackCard.cs" />
+    <Compile Include="ModFeature\TemplateAttackCard.cs" />
     <Compile Include="TextboxFormatTextAnalize.cs" />
     <Compile Include="TextureDict.cs" />
     <Compile Include="TranslationManager.cs" />

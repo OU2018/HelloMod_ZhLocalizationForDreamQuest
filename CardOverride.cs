@@ -241,7 +241,8 @@ namespace HelloMod
             }
             if (__instance.temporary)
             {
-                list.Add("<Temporary>");
+                //list.Add("<Temporary>");
+                list.Add(TR.GetStr(TR.SK, "<Temporary>"));
             }
             if (__instance.illusionary)
             {
@@ -288,7 +289,7 @@ namespace HelloMod
             {
                 text = "Sloth!";
             }
-            text = TR.GetStr(TR.SK, text);
+            text = TR.GetStr(TR.SK, text, "CARDEFFECT");
             if (__instance.IsPhysical())
             {
                 __instance.game.physical.AddToVisualStackNoYield(__instance.physical, new object[]
@@ -360,6 +361,74 @@ namespace HelloMod
                     Color.blue
                     }, "ScrollTextDurationColor");
                 }
+            }
+            return false;
+        }
+
+        public static bool Mahamat_PlayEffect(Mahamat __instance)
+        {
+            __instance.PythonPlayEffect();
+            int num = __instance.game.InGameRandomRange(0, 3);
+            int num2 = __instance.game.InGameRandomRange(0, 2);
+            if (num2 >= num)
+            {
+                num2++;
+            }
+            string text = string.Empty;
+            int i = 0;
+            int[] array = new int[] { num, num2 };
+            int length = array.Length;
+            while (i < length)
+            {
+                int num3 = array[i];
+                if (num3 == 0)
+                {
+                    text = "Knowledge!";
+                }
+                else if (num3 == 1)
+                {
+                    text = "Wrath!";
+                }
+                else if (num3 == 2)
+                {
+                    text = "Healing!";
+                }
+                else if (num3 == 3)
+                {
+                    text = "Protection!";
+                }
+                text = TR.GetStr(TR.SK, text, "CARDEFFECT");
+                if (__instance.IsPhysical())
+                {
+                    __instance.game.physical.AddToVisualStackNoYield(__instance.physical, new object[]
+                    {
+                    text,
+                    3,
+                    Color.blue
+                    }, "ScrollTextDurationColor");
+                }
+                int num4 = array[i];
+                if (num4 == 0)
+                {
+                    __instance.Draw(3);
+                }
+                else if (num4 == 1)
+                {
+                    __instance.DealDamage(10, DamageTypes.RAW);
+                }
+                else if (num4 == 2)
+                {
+                    __instance.Heal(15);
+                }
+                else if (num4 == 3)
+                {
+                    __instance.PlayerShield(15);
+                }
+                if (array[i] == num && __instance.IsPhysical())
+                {
+                    __instance.game.physical.VirtualWait((float)1);
+                }
+                i++;
             }
             return false;
         }
