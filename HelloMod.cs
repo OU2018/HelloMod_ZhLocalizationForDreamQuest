@@ -231,6 +231,27 @@ namespace HelloMod
                 typeof(ActionDiscard).GetMethod("SetTargetFinderParameters"),
                 typeof(HelloMod).GetMethod("ActionDiscard_SetTargetFinderParameters_Postfix")
                 );
+            //战斗中需要选择装备或祷告进行操作的卡牌 的弹窗
+            PatchTargetPostfix(
+                typeof(ActionPilfer).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionPilfer_SetTargetFinderParameters_Postfix")
+                );
+            PatchTargetPostfix(
+                typeof(ActionEngulf).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionEngulf_SetTargetFinderParameters_Postfix")
+                );
+            PatchTargetPostfix(
+                typeof(ActionCrush).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionCrush_SetTargetFinderParameters_Postfix")
+                );
+            PatchTargetPostfix(
+                typeof(ActionCrumble).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionCrumble_SetTargetFinderParameters_Postfix")
+                );
+            PatchTargetPostfix(
+                typeof(ActionMime).GetMethod("SetTargetFinderParameters"),
+                typeof(HelloMod).GetMethod("ActionMime_SetTargetFinderParameters_Postfix")
+                );
             //Select a card ||TODO:等待替换
             //Achievement Viewer 运行时替换
             var SDAVBuildTextPaneMethod = typeof(ShopDialogueAchievementViewer).GetMethod("BuildTextPane", BindingFlags.Public | BindingFlags.Instance);
@@ -1000,6 +1021,43 @@ namespace HelloMod
             if (!DreamQuestConfig.IsEn) {
                 tf.cardButtonText = TR.GetStr(DungeonPhysicalOverride.TableKey, "Discard this");
                 tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "DiscardContent").Replace(TR.PlaceHolder, __instance.strength.ToString());
+            }
+        }
+
+        public static void ActionPilfer_SetTargetFinderParameters_Postfix(TargetFinderParameters tf, ActionPilfer __instance)
+        {
+            if (!DreamQuestConfig.IsEn)
+            {
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose an equipment to steal");
+            }
+        }
+        public static void ActionEngulf_SetTargetFinderParameters_Postfix(TargetFinderParameters tf, ActionEngulf __instance)
+        {
+            if (!DreamQuestConfig.IsEn)
+            {
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose an equipment or prayer to exile");
+            }
+        }
+        public static void ActionCrush_SetTargetFinderParameters_Postfix(TargetFinderParameters tf, ActionCrush __instance)
+        {
+            if (!DreamQuestConfig.IsEn)
+            {
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose an equipment to destroy");
+            }
+        }
+        public static void ActionCrumble_SetTargetFinderParameters_Postfix(TargetFinderParameters tf, ActionCrumble __instance)
+        {
+            if (!DreamQuestConfig.IsEn)
+            {
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose an equipment or prayer to exile");
+            }
+        }
+
+        public static void ActionMime_SetTargetFinderParameters_Postfix(TargetFinderParameters tf, ActionMime __instance)
+        {
+            if (!DreamQuestConfig.IsEn)
+            {
+                tf.text = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose an action card to copy");
             }
         }
 
