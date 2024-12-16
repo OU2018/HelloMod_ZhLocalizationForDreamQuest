@@ -24,6 +24,10 @@ namespace HelloMod.DungeonFeatureGroup
                 typeof(TreasureChest).GetMethod("DisplayInMini"),
                 typeof(TreasureChestOverride).GetMethod("DisplayInMini")
                 );
+            modCenter.PatchTargetPrefix(
+                typeof(TreasureChest).GetMethod("Open"),
+                typeof(TreasureChestOverride).GetMethod("Open")
+                );
         }
 
         public static void GenerateText(TreasureChest __instance)
@@ -44,7 +48,7 @@ namespace HelloMod.DungeonFeatureGroup
             ShopDialogueClickableIcon shopDialogueClickableIcon = SDB.ClickableIcon(new Vector2(x * 0.5f, x * 0.5f), __instance.Portrait(), string.Empty);
             ShopDialogueButton shopDialogueButton = SDB.BasicButton(new Vector2(x * 0.6f, 0.35f), TR.GetStr(_dungeonFeatureTableName, "Open", "TREASURE"), () =>
             {
-                Open(__instance);
+                __instance.Open();
             });
             shopDialogueButton.FontSize(24);
             shopDialogueButton.ColliderMod(1.2f, 1.5f);
@@ -56,7 +60,7 @@ namespace HelloMod.DungeonFeatureGroup
             return false;
         }
 
-        public static void Open( TreasureChest __instance)
+        public static bool Open( TreasureChest __instance)
         {
             __instance.EnteringShop();
             float x = __instance.dungeon.physical.WindowSize().x;
@@ -94,6 +98,7 @@ namespace HelloMod.DungeonFeatureGroup
             shopDialogueAligned.UpperCenterTo(__instance.dungeon.ShopLocation());
             __instance.dungeon.activeShop = shopDialogueAligned;
             shopDialogueAligned.DoneBuilding();
+            return false;
         }
         public static ShopDialogueObject BuildLootObjects(float width, TreasureChest __instance)
         {
