@@ -109,7 +109,6 @@
     <Compile Include="DungeonFeatureGroup\BlacksmithOverride.cs" />
     <Compile Include="DungeonFeatureGroup\BrainsuckerOverride.cs" />
     <Compile Include="DungeonFeatureGroup\DungeonFeaturePatch.cs" />
-    <Compile Include="DungeonFeatureGroup\DungeonPlayerOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealingPoolOverride.cs" />
     <Compile Include="DungeonFeatureGroup\HealthPackOverride.cs" />
     <Compile Include="DungeonFeatureGroup\LevelStartOverride.cs" />
@@ -126,6 +125,7 @@
     <Compile Include="DungeonFeatureGroup\TreasureChestOverride.cs" />
     <Compile Include="DungeonOverride.cs" />
     <Compile Include="DungeonPhysicalOverride.cs" />
+    <Compile Include="DungeonPlayerOverride.cs" />
     <Compile Include="DungeonPlayerPhysicalOverride.cs" />
     <Compile Include="DungeonStatsOverride.cs" />
     <Compile Include="DungeonUserOverride.cs" />
