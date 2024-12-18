@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace HelloMod
 {
@@ -35,6 +36,25 @@ namespace HelloMod
             }
             HelloMod.mLogger.LogMessage(text);
             __result = text;
+        }
+
+        public static bool EquipmentString(TextMesh t,Dungeon __instance)
+        {
+            string text = string.Empty;
+            if (__instance.player.equipSlots > 0)
+            {
+                text = "\n" + __instance.player.NumEquipped() + "/" + __instance.player.equipSlots + " " + TR.GetStr(DungeonPhysicalOverride.TableKey, "Equipment Worn");
+            }
+            if (__instance.player.NumEquipped() < __instance.player.equipSlots && __instance.physical.equipButtons != null && __instance.physical.equipButtons.Count > __instance.player.NumEquipped())
+            {
+                t.renderer.material.color = Color.red;
+            }
+            else
+            {
+                t.renderer.material.color = Color.white;
+            }
+            t.text = text;
+            return false;
         }
     }
 }

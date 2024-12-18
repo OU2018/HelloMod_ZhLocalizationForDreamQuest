@@ -444,6 +444,10 @@ namespace HelloMod
                 typeof(Dungeon).GetMethod("BasicDeckViewer"),
                 typeof(DungeonOverride).GetMethod("BasicDeckViewer")
                 );
+            PatchTargetPrefix(
+                typeof(Dungeon).GetMethod("EquipmentString"),
+                typeof(DungeonOverride).GetMethod("EquipmentString")
+                );
             PatchTargetPostfix(
                 typeof(Dungeon).GetMethod("FinalBossPowers"),
                 typeof(DungeonOverride).GetMethod("FinalBossPowers")
