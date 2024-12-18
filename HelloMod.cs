@@ -269,9 +269,17 @@ namespace HelloMod
                 { "You have no history!  Go make some!", TR.GetStr(MainMenuOverride.TableKey, "You have no history!  Go make some!") } 
             };
             ReplaceStringPatch.PatchMethodWithTranspiler_In_SDHVCreateMethod(SDHVCreateMethod, SDHVCreateDict);
+            if (DreamQuestConfig.SkipLevelUpReward)//LevelUp Panel 重写，添加跳过的按钮
+            {
+                PatchTargetPrefix(
+                typeof(DungeonPlayer).GetMethod("LevelUpPane", BindingFlags.Public | BindingFlags.Instance),
+                typeof(DungeonPlayerOverride).GetMethod("LevelUpPane"));
+            }
             //LevelUp Pane 运行时替换
-            var LevelUpPaneMethod = typeof(DungeonPlayer).GetMethod("LevelUpPane", BindingFlags.Public | BindingFlags.Instance);
-            var LevelUpPaneDict = new Dictionary<string, string> {
+            else
+            {
+                var LevelUpPaneMethod = typeof(DungeonPlayer).GetMethod("LevelUpPane", BindingFlags.Public | BindingFlags.Instance);
+                var LevelUpPaneDict = new Dictionary<string, string> {
                 { "Choose", TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose") },
                 { "Level ", TR.GetStr(TranslationManager.specialTableKey, "Level") },
                 { "You have gained ", TR.GetStr(DungeonPhysicalOverride.TableKey, "You have gained") },
@@ -281,7 +289,8 @@ namespace HelloMod
                 { "You have learned:", TR.GetStr(DungeonPhysicalOverride.TableKey, "You have learned") },
                 { "Bonus! (Choose one)", TR.GetStr(DungeonPhysicalOverride.TableKey, "Bonus! (Choose one)") },
             };
-            ReplaceStringPatch.PatchMethodWithTranspiler_In_LevelUpPane(LevelUpPaneMethod, LevelUpPaneDict);
+                ReplaceStringPatch.PatchMethodWithTranspiler_In_LevelUpPane(LevelUpPaneMethod, LevelUpPaneDict);
+            }
             //升级界面的特殊内容
             PatchTargetPrefix(
                 typeof(LevelUpReward).GetMethod("SDOSpecial"),
@@ -687,6 +696,9 @@ namespace HelloMod
             bool cmdtot = parser.GetBool("Features", "CardViewer_Mainly_display_the_original_text", false);
             bool rnct = parser.GetBool("Features", "RandomName_Not_Contain_Translation", true);
             bool nameCover = parser.GetBool("Features", "UsePlayerNameTransition", true);
+
+            bool skipReward = parser.GetBool("Features", "SkipLevelUpReward", true);
+            int skipRewardGold = parser.GetInt("Settings", "SkipLevelUpRewardGold", 10);
             /*int maxPlayers = parser.GetInt("Settings", "MaxPlayers", 4);
             int gameSpeed = parser.GetInt("Settings", "GameSpeed", 1);*/
             Logger.LogInfo(lang + "|" + coverFont + "|" + unlockAll);
@@ -702,6 +714,8 @@ namespace HelloMod
             DreamQuestConfig.CardViewer_Mainly_display_the_original_text = cmdtot;
             DreamQuestConfig.RandomName_Not_Contain_Translation = rnct;
             DreamQuestConfig.UsePlayerNameTransition = nameCover;
+            DreamQuestConfig.SkipLevelUpReward = skipReward;
+            DreamQuestConfig.SkipLevelUpRewardGold = skipRewardGold;
 
             if(DreamQuestConfig.IsZh)
             {

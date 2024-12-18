@@ -33,6 +33,11 @@ namespace HelloMod
 
         public static bool UsePlayerNameTransition = true;//是否使用玩家名字的翻译（对局内的名字）
 
+        //24/12/17 新增项
+        public static bool SkipLevelUpReward = true;//是否可以跳过升级界面二选一的奖励
+
+        public static int SkipLevelUpRewardGold = 10;//跳过时获得的金币数
+
 
         public static bool IsZh { get { return CurrentLang == "zh"; } }
         public static bool IsEn { get { return CurrentLang == "en"; } }//一般用来判断是否执行原方法
