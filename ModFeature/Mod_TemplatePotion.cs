@@ -7,7 +7,7 @@ namespace HelloMod.ModFeature
 {
 
     [Serializable]
-    public class TemplatePotion : ActionCard
+    public class Mod_TemplatePotion : ActionCard
     {
         public override void Initialize()
         {
@@ -19,13 +19,14 @@ namespace HelloMod.ModFeature
         {
             this.PythonPlayEffect();
             this.player.FullHeal();
+            this.DealDamage(3, DamageTypes.PHYSICAL);
             this.PotionSelfDestruct();//药水永久删除
         }
 
         public virtual void PythonInitialize()
         {
-            this.cardName = "Healing Potion";
-            this.text = "Completely heal. This card is removed from the game and your deck permanently after use.";
+            this.cardName = "Template Potion";
+            this.text = "Deal 10 @atk .Full Heal.";
             this.flavorText = string.Empty;
             this.cost = 1;
             this.goldCost = 7;
@@ -39,9 +40,14 @@ namespace HelloMod.ModFeature
             this.AIPlaySequence = 50;
         }
 
-        // Token: 0x06000848 RID: 2120 RVA: 0x0002C63C File Offset: 0x0002A83C
         public virtual void PythonPlayEffect()
         {
+        }
+
+        public override string ImageName()
+        {
+            //return base.ImageName();
+            return "Textures/Cards/" + "HealingPotion";
         }
     }
 }

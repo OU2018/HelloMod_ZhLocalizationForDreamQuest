@@ -130,11 +130,12 @@
     <Compile Include="DungeonStatsOverride.cs" />
     <Compile Include="DungeonUserOverride.cs" />
     <Compile Include="FormatTextTranpiler.cs" />
+    <Compile Include="GameOverride.cs" />
     <Compile Include="InfoblockOverride.cs" />
     <Compile Include="LevelUpRewardOverride.cs" />
     <Compile Include="LordlyDecreesOverride.cs" />
     <Compile Include="ModFeature\DungeonActionRandomAlchemy.cs" />
-    <Compile Include="ModFeature\TemplatePotion.cs" />
+    <Compile Include="ModFeature\Mod_TemplatePotion.cs" />
     <Compile Include="MonsterOverride.cs" />
     <Compile Include="MonsterDetailOverride\GoblinMechanistOverride.cs" />
     <Compile Include="ReplaceStringPatch.cs" />

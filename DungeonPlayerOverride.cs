@@ -154,5 +154,79 @@ namespace HelloMod
             __instance.GainExp(0);
             __instance.GainGold(DreamQuestConfig.SkipLevelUpRewardGold);
         }
+        //添加卡牌 重写
+        public static bool AddCard(string s, bool isLevelUp,DungeonPlayer __instance)
+        {
+            if (!isLevelUp)
+            {
+                __instance.stats.GainCard(s);
+            }
+            if (!isLevelUp)
+            {
+                Card card = __instance.game.CreateMomentaryCard(s);
+                for (int i = 0; i < __instance.elementalAffinity.Length; i++)
+                {
+                    __instance.elementalAffinity[i] = __instance.elementalAffinity[i] + card.elementalAffinity[i];
+                }
+            }
+            string[] array = new string[__instance.deck.Length + 1];
+            for (int j = 0; j < __instance.deck.Length; j++)
+            {
+                array[j] = __instance.deck[j];
+            }
+            array[__instance.deck.Length] = s;
+            __instance.deck = array;
+            if (__instance.dungeon.physical.IsBuilt())
+            {
+                __instance.game.physical.AddToVisualStackNoYield(__instance.dungeon.physical, new string[] { s }, "AddCard");
+            }
+            if (__instance.CanEquip(s))
+            {
+                __instance.Equip(s);
+            }
+            return false;
+        }
+        //从卡组删除卡牌 重写：没有重写的必要，核心的部分在 DungeonPhysical.RemoveCard 重写只是为了插入 Log
+        public static bool RemoveCardFromDeck(ref bool __result, string s, DungeonPlayer __instance)
+        {
+            bool flag;//这个返回值似乎没有在任何地方被使用
+            if (__instance.deck.Length == 0)
+            {
+                flag = false;
+            }
+            else
+            {
+                string[] array = new string[__instance.deck.Length - 1];
+                int num = 0;
+                bool searchDone = false;
+                for (int i = 0; i < __instance.deck.Length; i++)
+                {
+                    HelloMod.mLogger.LogMessage("Try Remove From Stack==>" + s + "||Current==>" + __instance.deck[i]);
+                    if (!searchDone && __instance.deck[i] == s)
+                    {
+                        searchDone = true;
+                    }
+                    else if (num < array.Length)//
+                    {
+                        array[num] = __instance.deck[i];
+                        num++;
+                    }
+                }
+                if (searchDone)
+                {
+                    __instance.deck = array;
+                    if (__instance.dungeon.physical.IsBuilt())
+                    {
+                        HelloMod.mLogger.LogMessage("Success Add Remove Request==>" + s );
+                        __instance.game.physical.AddToVisualStackNoYield(__instance.dungeon.physical, new string[] { s }, "RemoveCard");
+                        //第一个参数是实例对象，第三个参数是实例对象的对应方法
+                    }
+                }
+                __instance.VerifyEquipment(s);
+                flag = searchDone;
+            }
+            __result = flag;
+            return false;
+        }
     }
 }

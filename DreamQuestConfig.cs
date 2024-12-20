@@ -37,6 +37,9 @@ namespace HelloMod
         public static bool SkipLevelUpReward = true;//是否可以跳过升级界面二选一的奖励
 
         public static int SkipLevelUpRewardGold = 10;//跳过时获得的金币数
+        //24/12/19 新增项
+        public static bool AddModItem = true;//增加mod新增的技能
+
 
 
         public static bool IsZh { get { return CurrentLang == "zh"; } }

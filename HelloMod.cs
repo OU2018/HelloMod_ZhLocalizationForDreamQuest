@@ -13,6 +13,7 @@ using HelloMod.DungeonFeatureGroup;
 using HelloMod.CombatAbilityGroup;
 using System.Text.RegularExpressions;
 using HelloMod.MonsterDetailOverride;
+using UnityScript.Lang;
 
 namespace HelloMod
 {
@@ -101,6 +102,22 @@ namespace HelloMod
                 PatchTargetPrefix(
                       typeof(ProfessionBase).GetMethod("GenerateName"),
                       typeof(ProfessionBaseOverride).GetMethod("GenerateName"));
+                //[核心机制]涉及新添加的卡牌
+                PatchTargetPrefix(
+                      typeof(Game).GetMethod("StaticCreateMomentaryCard", new Type[] {typeof(string)}),
+                      typeof(GameOverride).GetMethod("StaticCreateMomentaryCard"));
+                PatchTargetPrefix(
+                      typeof(Game).GetMethod("CreateCardAtTimeVirtualSplit"),
+                      typeof(GameOverride).GetMethod("CreateCardAtTimeVirtualSplit"));
+                PatchTargetPrefix(
+                      typeof(Game).GetMethod("PopulateFromString"),
+                      typeof(GameOverride).GetMethod("PopulateFromString"));
+                PatchTargetPrefix(
+                typeof(DungeonPhysical).GetMethod("RemoveCard"),
+                typeof(DungeonPhysicalOverride).GetMethod("RemoveCard"));
+                PatchTargetPrefix(
+                typeof(DungeonPlayer).GetMethod("RemoveCardFromDeck"),
+                typeof(DungeonPlayerOverride).GetMethod("RemoveCardFromDeck"));
 
                 PatchTargetPostfix(
                     typeof(DungeonPlayerPhysical).GetMethod("LevelString"),
@@ -291,6 +308,10 @@ namespace HelloMod
             };
                 ReplaceStringPatch.PatchMethodWithTranspiler_In_LevelUpPane(LevelUpPaneMethod, LevelUpPaneDict);
             }
+
+            PatchTargetPrefix(
+                typeof(DungeonPlayer).GetMethod("AddCard", new Type[] { typeof(string), typeof(bool)}),
+                typeof(DungeonPlayerOverride).GetMethod("AddCard"));
             //升级界面的特殊内容
             PatchTargetPrefix(
                 typeof(LevelUpReward).GetMethod("SDOSpecial"),
@@ -1177,6 +1198,7 @@ namespace HelloMod
                     r.material.mainTexture = tex;
                 }
             }//TODO:其他卡牌卡面替换
+            mLogger.LogMessage("CardTexture ==> " + s);
         }
 
         public static void CardList_GetCardListPostfix(CardList __instance)
@@ -1185,6 +1207,7 @@ namespace HelloMod
             CardList.allCards.Add("");//
         }
 
+        
 
         public string font_url;
         public int version;
