@@ -97,6 +97,7 @@
     <Compile Include="ClipboardUtility.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityDesperatePrayerOverride.cs" />
     <Compile Include="DeckBuilderTopOverride.cs" />
+    <Compile Include="DungeonActionPortentOverride.cs" />
     <Compile Include="DungeonFeatureGroup\AltarOverride.cs" />
     <Compile Include="CardPhysicalOverride.cs" />
     <Compile Include="CombatAbilityGroup\CombatAbilityNormalPatch.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="DungeonUserOverride.cs" />
     <Compile Include="FormatTextTranpiler.cs" />
     <Compile Include="GameOverride.cs" />
+    <Compile Include="GlobalTextureManager.cs" />
     <Compile Include="InfoblockOverride.cs" />
     <Compile Include="LevelUpRewardOverride.cs" />
     <Compile Include="LordlyDecreesOverride.cs" />
@@ -164,7 +166,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ActionOverride\" />
     <Folder Include="ResourceUtils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

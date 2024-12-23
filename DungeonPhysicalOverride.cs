@@ -4,12 +4,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Documents;
 using UnityEngine;
 using UnityScript.Lang;
 
 namespace HelloMod
 {
-    internal class DungeonPhysicalOverride
+    public class ModMenuButtonData
+    {
+        private Func<string, string, string> nameFunc = null;
+        private string enName = string.Empty;
+        private Action<DungeonPlayer> onClick = null;
+        public ModMenuButtonData(Func<string, string, string> nameFunc, string enName, Action<DungeonPlayer> onClick)
+        {
+            this.nameFunc = nameFunc;
+            this.enName = enName;
+            this.onClick = onClick;
+        }
+
+        public ShopDialogueButton GetButtonInstance(Vector2 btnSize, DungeonPlayer currentPlayer)
+        {
+            string btnName = nameFunc.Invoke(DreamQuestConfig.CurrentLang, enName);
+            ShopDialogueButton btn = SDB.BasicButton(btnSize, btnName, () => { onClick(currentPlayer); });
+            return btn;
+        }
+    }
+
+
+    public class DungeonPhysicalOverride
     {
         private static Dungeon mDungeon = null;
 
@@ -88,19 +110,105 @@ namespace HelloMod
             __instance.dungeon.SubWindow(() => { ModMenu(__instance); });
         }
 
+        private static Vector2 defSize = new Vector2(4f, 0.4f);
+
+        public static void AddBasicButton(Func<string,string, string> nameFunc, string enName, Action<DungeonPlayer> onClick)
+        {
+            btnDataList.Add(new ModMenuButtonData(nameFunc, enName, onClick));
+        }
+
+        private static List<ShopDialogueObject> GenerateButtonListFromData(DungeonPlayer currentPlayer)
+        {
+            List<ShopDialogueObject> result = new List<ShopDialogueObject>();
+            foreach (var item in btnDataList)
+            {
+                result.Add(item.GetButtonInstance(defSize, currentPlayer));
+            }
+            return result;  
+        }
+
+        private static List<ModMenuButtonData> btnDataList = new List<ModMenuButtonData>();
+
+        private static bool isInit = false;
         public static void ModMenu(DungeonPhysical __instance)
         {
-            float num = 4.5f;
-            float num2 = 5f;
-            ShopDialogueObject shopDialogueObject = SDB.Align(new System.Collections.Generic.List<ShopDialogueObject>
+            float win_width = 4.5f;
+            float win_height = 5f;
+            float btn_height = defSize.y;
+            float space_y = 0.3f;
+            int maxWinItemCount = 10;
+            if (!isInit)
             {
-                SDB.BasicButton(new Vector2((float)4, 0.4f), TR.GetStr(TableKey, "Random Alchemy"), ()=>{ RandomAlchemy(__instance.dungeon.player); }),
-            }.ToArray(), "VP", 0.3f);
-            shopDialogueObject = SDB.Padded(shopDialogueObject, new Vector2(num, num2), ShopDialogueCardinal.center);
-            SDB.Background(shopDialogueObject, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)), Color.black);
-            SDB.CancelButton(shopDialogueObject, __instance.dungeon.WindowBack);
-            shopDialogueObject.UpperCenterTo(__instance.dungeon.ShopLocation());
-            __instance.dungeon.activeShop = shopDialogueObject;
+                isInit = true;
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "Random Alchemy", RandomAlchemy);
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "Find Monster", (player) =>
+                {
+                    player.AddAction(new DungeonActionFindMonster());
+                });
+                //测试 模组 按钮数量
+                /*for (int i = 0; i < maxWinItemCount * 2 + 3; i++) {
+                    btnList.Add(SDB.BasicButton(new Vector2((float)4, 0.4f), TR.GetStr(TableKey, "Random Alchemy"), () => { RandomAlchemy(__instance.dungeon.player); }));
+                }*/
+                //限制单页数量为10个最好
+            }
+            List<ShopDialogueObject> btnList = GenerateButtonListFromData(__instance.dungeon.player);
+
+
+            float total_height = 0;
+            int pageItemCount = Mathf.Min(maxWinItemCount, btnList.Count);
+            total_height = btn_height * pageItemCount + space_y * (pageItemCount + 1);
+            win_height = total_height;
+
+            if (btnList.Count > maxWinItemCount)
+            {
+                ShopDialogueObject[] pagedItemArr = new ShopDialogueObject[btnList.Count/maxWinItemCount + 1];
+                int currentPageIndex = 0;
+                List<ShopDialogueObject> pageBtnList = new List<ShopDialogueObject>();
+                for (int i = 0; i < btnList.Count; i++)
+                {
+                    if((i + 1) % maxWinItemCount == 0)
+                    {
+                        pageBtnList.Add(btnList[i]);
+                        //完成一页
+                        ShopDialogueObject align = SDB.Align(pageBtnList.ToArray(), "VP", space_y);
+                        align = SDB.Padded(align, new Vector2(win_width, win_height), ShopDialogueCardinal.center);
+
+                        pagedItemArr[currentPageIndex] = align;
+                        currentPageIndex++;
+                        pageBtnList.Clear();
+                        continue;
+                    }
+                    pageBtnList.Add(btnList[i]);
+                }
+                if (btnList.Count % maxWinItemCount != 0) {
+                    //完成最后一页
+                    ShopDialogueObject align = SDB.Align(pageBtnList.ToArray(), "VP", space_y);
+                    align = SDB.Padded(align, new Vector2(win_width, win_height), ShopDialogueCardinal.uppercenter);
+                    pagedItemArr[currentPageIndex] = align;
+                }
+                //在单页承载量过大时使用分页加载  超过10为过大
+                ShopDialogueObject shopDialogueObject = null;//pageContainer
+                ShopDialoguePaged shopDialoguePaged = SDB.Paged(pagedItemArr);
+                shopDialogueObject = SDB.Padded(shopDialoguePaged, new Vector2(win_width, win_height), ShopDialogueCardinal.center);
+                SDB.Background(shopDialogueObject, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)), Color.black);
+                SDB.CancelButton(shopDialogueObject, __instance.dungeon.WindowBack);
+                shopDialogueObject.UpperCenterTo(__instance.dungeon.ShopLocation());
+                __instance.dungeon.activeShop = shopDialogueObject;
+            }
+            else
+            {
+                //单页的情况下
+                ShopDialogueObject shopDialogueObject = SDB.Align(btnList.ToArray(), "VP", space_y);
+                shopDialogueObject = SDB.Padded(shopDialogueObject, new Vector2(win_width, win_height), ShopDialogueCardinal.center);
+                SDB.Background(shopDialogueObject, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)), Color.black);
+                SDB.CancelButton(shopDialogueObject, __instance.dungeon.WindowBack);
+                shopDialogueObject.UpperCenterTo(__instance.dungeon.ShopLocation());
+                __instance.dungeon.activeShop = shopDialogueObject;
+            }
         }
 
         public static void RandomAlchemy(DungeonPlayer player)
@@ -143,7 +251,6 @@ namespace HelloMod
             bool searchDone = false;
             for (int i = 0; i < __instance.cachedCardObjects.Length; i++)
             {
-                HelloMod.mLogger.LogMessage("Try Remove Card==>" + s + "||Current==>" + __instance.cachedCardObjects[i].card.internalName);
                 if (!searchDone && __instance.cachedCardObjects[i].card.internalName == s)
                 {
                     searchDone = true;

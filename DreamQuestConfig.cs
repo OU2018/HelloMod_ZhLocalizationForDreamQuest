@@ -7,10 +7,13 @@ using UnityEngine;
 
 namespace HelloMod
 {
-    internal static class DreamQuestConfig
+    public static class DreamQuestConfig
     {
         public const string EN = "en";
         public const string ZH = "zh";
+        //只是预留，未实际使用
+        public const string JP = "jp";
+        public const string KR = "kr";
 
         public static string CurrentLang = "zh"; 
         public static bool CoverFont = true; 

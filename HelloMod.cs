@@ -33,6 +33,12 @@ namespace HelloMod
 
         public static Action OnAfterFontLoaded;
         public static Action OnAfterTexLoaded;
+
+        private static Queue<Action> modInitQueue = new Queue<Action>();
+        public static void RegisterModInitMethod(Action init)
+        {
+            modInitQueue.Enqueue(init);
+        }
         void Awake()
         {
             mLogger = new ManualLogSource("hellomod");
@@ -125,6 +131,11 @@ namespace HelloMod
                 PatchTargetPostfix(
                     typeof(DungeonPlayer).GetMethod("GetName"),
                     typeof(DungeonPlayerPhysicalOverride).GetMethod("DungeonPlayer_GetName"));
+
+                //重载的卡牌图像，用正常的路径找不到图片
+                PatchTargetPrefix(
+                    typeof(MaterialManager).GetMethod("Fallback", BindingFlags.NonPublic | BindingFlags.Static),
+                    typeof(HelloMod).GetMethod("MaterialManager_Fallback_Override"));
                 //特殊的图片卡牌，覆盖
                 PatchTargetPostfix(
                     typeof(MaterialManager).GetMethod("Fallback", BindingFlags.NonPublic|BindingFlags.Static),
@@ -140,18 +151,18 @@ namespace HelloMod
             //如果阻断了Mod运行
             if (DreamQuestConfig.DontloadMod)
                 return;
-            mLogger.LogInfo("Mod Start");
-            //Prefix测试
-            try
+            mLogger.LogInfo("Mod Start:" + modInitQueue.Count);
+            //Mod 的 Init方法调用
+            foreach (var item in modInitQueue)
             {
-                PatchTargetPrefix(
+                item.Invoke();
+            }
+            mLogger.LogInfo("Mod Done Init");
+            //Prefix测试
+            PatchTargetPrefix(
                 typeof(FontManager).GetMethod("SetFontSize", new Type[] { typeof(TextMesh), typeof(int) }),
                 typeof(HelloMod).GetMethod("SetFontSizeOverride", new Type[] { typeof(TextMesh), typeof(int) }));
-            }
-            catch (Exception ex)
-            {
-                base.Logger.LogError("Error while applying patch: " + ex.ToString());
-            }
+
             //成就翻译
             PatchTargetPostfix(
                 typeof(ShopDialogueAchievementViewer).GetMethod("AchievementName"),
@@ -388,6 +399,18 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(DungeonActionDevour).GetMethod("Perform", new Type[] { typeof(Tile) }),
                 typeof(DungeonActionOverride).GetMethod("DungeonActionDevour_Perform"));
+            //刺客的刺杀能力（类似巨龙的吞噬）
+            PatchTargetPrefix(
+                typeof(DungeonActionMurder).GetMethod("Perform", new Type[] { typeof(Tile) }),
+                typeof(DungeonActionOverride).GetMethod("DungeonActionMurder_Perform"));
+            //Find Monster能力（不知道是谁的）
+            PatchTargetPrefix(
+                typeof(DungeonActionFindMonster).GetMethod("Perform"),
+                typeof(DungeonActionOverride).GetMethod("DungeonActionFindMonster_Perform"));
+            //地牢技能无法被释放时的提示
+            PatchTargetPrefix(
+                typeof(DungeonAction).GetMethod("OnClick", new Type[0]),
+                typeof(DungeonActionOverride).GetMethod("OnClick"));
             //地牢技能准备就绪
             PatchTargetPrefix(
                 typeof(DungeonPlayer).GetMethod("CoolingDownAbilities"),
@@ -624,6 +647,13 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(TargetFinderLine).GetMethod("OnGUI"),
                 typeof(TargetFinderLineOverride).GetMethod("OnGUI"));
+
+            PatchTargetPrefix(
+                typeof(DungeonActionPortent).GetMethod("PortentPerform"),
+                typeof(DungeonActionPortentOverride).GetMethod("PortentPerform"));
+            PatchTargetPostfix(
+                typeof(DungeonActionPortent).GetMethod("BuildText"),
+                typeof(DungeonActionPortentOverride).GetMethod("BuildText"));
             //CheatMenu 运行时补丁
             var cheatMenuMethod = typeof(DungeonPhysical).GetMethod("CheatMenu", BindingFlags.Public | BindingFlags.Instance);
             var cheatMenuDict = new Dictionary<string, string> { 
@@ -1190,15 +1220,28 @@ namespace HelloMod
 
             if (s.Contains("Penalty"))
             {
-                mLogger.LogMessage(s);
                 string k = s.Replace("Textures/", "");
                 Texture tex = textMgr.FindTextureByKey(k);
                 if (tex)
                 {
                     r.material.mainTexture = tex;
                 }
-            }//TODO:其他卡牌卡面替换
-            mLogger.LogMessage("CardTexture ==> " + s);
+            }
+        }
+        //使用自己的卡面（不走正常获得卡牌的路径）
+        public static bool MaterialManager_Fallback_Override(Renderer r, string s)
+        {
+            if (s.Contains("ModTexture"))
+            {
+                Texture tex = GlobalTextureManager.GetTextureByModTextureKey(s);//全局的自定义材质管理器
+                if(tex == null)
+                {
+                    //使用某一张默认的卡牌材质 Heal 的默认材质
+                    tex = (Texture)Resources.Load("Textures/Cards/Heal", typeof(Texture));
+                }
+                r.material.mainTexture = tex;
+            }
+            return true;
         }
 
         public static void CardList_GetCardListPostfix(CardList __instance)

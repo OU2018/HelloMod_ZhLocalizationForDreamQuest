@@ -25,11 +25,6 @@ namespace HelloMod.ModFeature
             this.dungeon.player.AddCard("HealingPotion");
             this.dungeon.player.AddCard("Pierce3");
             this.dungeon.player.AddCard("Mod_TemplatePotion");
-
-            foreach (var item in this.dungeon.player.deck)
-            {
-                HelloMod.mLogger.LogMessage(item);
-            }
         }
     }
 }

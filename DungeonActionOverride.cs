@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityScript.Lang;
 
 namespace HelloMod
 {
-    internal class DungeonActionOverride
+    public class DungeonActionOverride
     {
         public static void ButtonNamePostfix(ref string __result,DungeonAction __instance)//地牢技能名称
         {
@@ -28,6 +30,20 @@ namespace HelloMod
             {
                 __result = TR.GetStr("DungeonAction", __result);
             }
+        }
+
+        public static bool OnClick(DungeonAction __instance)
+        {
+            if (!__instance.ShouldPerform())
+            {
+                __instance.dungeon.player.LocationText(TR.GetStr(DungeonPhysicalOverride.TableKey, "Not Here..."), 3, Color.red, __instance.dungeon.board.PlayerTile().physical.transform.position + new Vector3(0.2f, 0.35f, (float)0));
+            }
+            else
+            {
+                __instance.currentCooldown = __instance.MaxCooldown();
+                __instance.Perform();
+            }
+            return false;
         }
 
         public static bool DungeonActionHoard_HoardPerform(DungeonActionHoard __instance)
@@ -77,5 +93,49 @@ namespace HelloMod
             }
             return false;
         }
+
+        public static bool DungeonActionMurder_Perform(Tile t, DungeonActionMurder __instance)
+        {
+            Monster monster = t.DestroyNormalMonster();
+            t.Refresh();
+            if (monster != null)
+            {
+                int num = monster.ExperienceValue();
+                __instance.dungeon.player.PlayerSpriteText("+" + num + " " + TR.GetStr(DungeonPhysicalOverride.TableKey, "EXP"), 3, Utility.darkGreen);
+                __instance.dungeon.player.ProcessKill(monster);
+            }
+            return false;
+        }
+
+        public static bool DungeonActionFindMonster_Perform(DungeonActionFindMonster __instance)
+        {
+            List<Tile> list = new List<Tile>();
+            Tile tile = __instance.dungeon.board.PlayerTile();
+            IEnumerator enumerator = UnityRuntimeServices.GetEnumerator(tile.Neighbors());
+            while (enumerator.MoveNext())
+            {
+                object obj = enumerator.Current;
+                object obj3;
+                object obj2 = (obj3 = obj);
+                if (!(obj2 is Tile))
+                {
+                    obj3 = (Tile)obj2;
+                }
+                Tile tile2 = (Tile)obj3;
+                if (tile2.IsUnused())
+                {
+                    list.Add(tile2);
+                    UnityRuntimeServices.Update(enumerator, tile2);
+                }
+            }
+            int num = __instance.game.InGameRandomRange(0, list.Count - 1);
+            Tile tile3 = list[num];
+            __instance.dungeon.board.CreateMonsterAtLevel(tile3, __instance.dungeon.player.level);
+            __instance.dungeon.board.playerSprite.Refresh();
+            __instance.dungeon.player.LocationText(TR.GetStr(DungeonPhysicalOverride.TableKey, "Interrupted!"), 3, Color.red, __instance.dungeon.board.PlayerTile().physical.transform.position + new Vector3(0.2f, 0.35f, (float)0));
+            return false;
+        }
+
+
     }
 }
