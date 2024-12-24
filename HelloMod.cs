@@ -39,6 +39,7 @@ namespace HelloMod
         {
             modInitQueue.Enqueue(init);
         }
+#pragma warning disable IDE0051
         void Awake()
         {
             mLogger = new ManualLogSource("hellomod");
@@ -52,14 +53,11 @@ namespace HelloMod
             //如果阻断了Mod运行
             if(DreamQuestConfig.DontloadMod)
                 return;
-            //载入资源 unity3d 资源包
-            font_url = $"file:///{Paths.PluginPath}\\fontPack.unity3d";
-            version = 2;
-            StartCoroutine(LoadFontBundle());
-
-            tex_url = $"file:///{Paths.PluginPath}\\texturePack.unity3d";
-            StartCoroutine(LoadTextureBundle());
             TranslationManager.Initialize();
+            //载入字体
+            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\fontPack.unity3d", 2, OnLoadFont));
+            //载入 许愿 卡牌
+            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\texturePack.unity3d", 2, OnLoadPenltyCardTexture));
 
 
             //[基础区域]
@@ -1250,102 +1248,88 @@ namespace HelloMod
             CardList.allCards.Add("");//
         }
 
-        
-
-        public string font_url;
-        public int version;
-        //TODO:
-        public IEnumerator LoadFontBundle()
+        private void OnLoadFont(AssetBundle assetBundle)
         {
-            using (WWW www = WWW.LoadFromCacheOrDownload(font_url, version))
+            if (assetBundle.mainAsset != null)
             {
-                base.Logger.LogInfo("尝试从 www 载入 " + font_url + "} {" + version + "}");
-                yield return www;
-                if (System.IO.File.Exists(font_url)) base.Logger.LogInfo("文件存在AssetBundle：fontPack.unity3d ！");
-                AssetBundle assetBundle = www.assetBundle;
-                base.Logger.LogInfo("成功载入AssetBundle：fontPack.unity3d ！");
-                if (assetBundle == null)//此处为空
+                GameObject gameObject = assetBundle.mainAsset as GameObject;
+
+                Instantiate(gameObject);
+                assetBundle.Unload(false);
+
+                GameObject gobj = GameObject.Find("TestUI");
+                if (gobj != null)
                 {
-                    base.Logger.LogInfo("AssetBundle 为空！");
-                }
-                else
-                {
-                    if(assetBundle.mainAsset != null)
+                    loadFont = gobj.GetComponentInChildren<Text>().font;
+                    loadFont.material.renderQueue = FontManager.instance.fontMaterials[0].renderQueue;
+                    isLoadedFont = true;
+                    //重新设置字体
+                    for (int i = 0; i < recordMesh.Count; i++)
                     {
-                        GameObject gameObject = assetBundle.mainAsset as GameObject;
-
-                        Instantiate(gameObject);
-                        assetBundle.Unload(false);
-
-                        GameObject gobj = GameObject.Find("TestUI");
-                        if (gobj != null) { 
-                            loadFont = gobj.GetComponentInChildren<Text>().font;
-                            loadFont.material.renderQueue = FontManager.instance.fontMaterials[0].renderQueue;
-                            isLoadedFont = true;
-                            //重新设置字体
-                            for (int i = 0; i < recordMesh.Count; i++)
-                            {
-                                if(recordMesh[i] != null)
-                                    SetFontSizeOverride(recordMesh[i], recordFontSize[i]);
-                            }
-                            recordMesh.Clear();
-                            recordFontSize.Clear();
-
-                            gobj.SetActive(false);
-
-                            OnAfterFontLoaded?.Invoke();
-                        }
+                        if (recordMesh[i] != null)
+                            SetFontSizeOverride(recordMesh[i], recordFontSize[i]);
                     }
-                    else
-                    {
-                        base.Logger.LogInfo("AssetBundle：fontPack.unity3d  assetBundle.mainAsset 为空！");
-                    }
+                    recordMesh.Clear();
+                    recordFontSize.Clear();
+
+                    gobj.SetActive(false);
+
+                    OnAfterFontLoaded?.Invoke();
                 }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：fontPack.unity3d  assetBundle.mainAsset 为空！");
             }
         }
 
-        public string tex_url;
-        public IEnumerator LoadTextureBundle()
+        private void OnLoadPenltyCardTexture(AssetBundle assetBundle)
         {
-            using (WWW www = WWW.LoadFromCacheOrDownload(tex_url, version))
+            if (assetBundle.mainAsset != null)
             {
-                base.Logger.LogInfo("尝试从 www 载入 " + tex_url + "} {" + version + "}");
+                GameObject gameObject = assetBundle.mainAsset as GameObject;
+
+                GameObject instance = (GameObject)Instantiate(gameObject);
+                assetBundle.Unload(false);
+                mLogger.LogMessage(instance.name + "||child:" + instance.transform.childCount);
+
+                GameObject gobj = instance;
+                if (gobj != null)
+                {
+                    gobj.SetActive(false);
+                    DontDestroyOnLoad(gobj);
+                    mLogger.LogMessage(gobj.name + "||child:" + gobj.transform.childCount);
+                    textMgr = new TextureDict(gobj);
+                    textMgr.GenerateArr();
+                    OnAfterTexLoaded?.Invoke();
+                }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：texturePack.unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+
+        public IEnumerator LoadBundle(string url, int version,Action<AssetBundle> callback)
+        {
+            using (WWW www = WWW.LoadFromCacheOrDownload(url, version))
+            {
+                base.Logger.LogInfo("尝试从 www 载入 " + url + "} {" + version + "}");
                 yield return www;
-                if (System.IO.File.Exists(tex_url)) base.Logger.LogInfo("文件存在AssetBundle：texturePack.unity3d ！");
+                if (System.IO.File.Exists(url)) base.Logger.LogInfo("存在AssetBundle：" + url);
                 AssetBundle assetBundle = www.assetBundle;
-                base.Logger.LogInfo("成功载入AssetBundle：texturePack.unity3d ！");
+                base.Logger.LogInfo("成功载入AssetBundle：" + url);
                 if (assetBundle == null)//此处为空
                 {
-                    base.Logger.LogInfo("AssetBundle 为空！");
+                    base.Logger.LogInfo("AssetBundle:" + url + " 为空！");
                 }
                 else
                 {
-                    if (assetBundle.mainAsset != null)
-                    {
-                        GameObject gameObject = assetBundle.mainAsset as GameObject;
-
-                        GameObject instance = (GameObject)Instantiate(gameObject);
-                        assetBundle.Unload(false);
-                        mLogger.LogMessage(instance.name + "||child:" + instance.transform.childCount);
-
-                        GameObject gobj = instance;
-                        if (gobj != null)
-                        {
-                            gobj.SetActive(false);
-                            DontDestroyOnLoad(gobj);
-                            mLogger.LogMessage(gobj.name + "||child:" + gobj.transform.childCount);
-                            textMgr = new TextureDict(gobj);
-                            textMgr.GenerateArr();
-                            //textMgr.InitTextureDict();
-                            OnAfterTexLoaded?.Invoke();
-                        }
-                    }
-                    else
-                    {
-                        base.Logger.LogInfo("AssetBundle：texturePack.unity3d  assetBundle.mainAsset 为空！");
-                    }
+                    callback.Invoke(assetBundle);
                 }
             }
         }
+#pragma warning restore IDE0051
     }
 }
