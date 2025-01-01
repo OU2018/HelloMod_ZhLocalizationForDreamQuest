@@ -14,6 +14,7 @@ using HelloMod.CombatAbilityGroup;
 using System.Text.RegularExpressions;
 using HelloMod.MonsterDetailOverride;
 using UnityScript.Lang;
+using System.IO;
 
 namespace HelloMod
 {
@@ -33,6 +34,7 @@ namespace HelloMod
 
         public static Action OnAfterFontLoaded;
         public static Action OnAfterTexLoaded;
+        public static Action OnAfterProfessionBigLoaded;
 
         private static Queue<Action> modInitQueue = new Queue<Action>();
         public static void RegisterModInitMethod(Action init)
@@ -54,11 +56,27 @@ namespace HelloMod
             if(DreamQuestConfig.DontloadMod)
                 return;
             TranslationManager.Initialize();
-            //载入字体
-            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\fontPack.unity3d", 2, OnLoadFont));
-            //载入 许愿 卡牌
-            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\texturePack.unity3d", 2, OnLoadPenltyCardTexture));
 
+            LoadAssetBundle(15);
+            if (DreamQuestConfig.IsUseOtherResource)
+            {
+                LoadLocalArtResource();
+                StartCoroutine(LoadAudio());//TODO:可以弄成通用方法
+                //添加按钮点击的音效
+                PatchTargetPostfix(
+                typeof(NiceButton).GetMethod("OnMouseUp", new Type[0]),
+                typeof(HelloMod).GetMethod("NiceButton_OnMouseUp_Postfix"));
+                //修改背景音乐的方法，使得音量可以被控制
+                try
+                {
+                    PatchTargetPrefix(
+                    typeof(MusicManager).GetMethod("FadeToMusic", BindingFlags.NonPublic),
+                    typeof(HelloMod).GetMethod("MusicManager_FadeToMusic"));
+                }
+                catch (Exception ex) { 
+                    mLogger.LogError(ex);
+                }
+            }
 
             //[基础区域]
             //让ShopDialogueButton创建出来后就自动重载字体
@@ -138,6 +156,10 @@ namespace HelloMod
                 PatchTargetPostfix(
                     typeof(MaterialManager).GetMethod("Fallback", BindingFlags.NonPublic|BindingFlags.Static),
                     typeof(HelloMod).GetMethod("MaterialManager_Fallback"));
+
+                PatchTargetPrefix(
+                    typeof(Resources).GetMethod("Load", new Type[] {typeof(string), typeof(Type)}),
+                    typeof(HelloMod).GetMethod("Resource_Load_Prefix"));
             }
             catch (Exception ex)
             {
@@ -156,6 +178,8 @@ namespace HelloMod
                 item.Invoke();
             }
             mLogger.LogInfo("Mod Done Init");
+
+            LoadAudioSetting();
             //Prefix测试
             PatchTargetPrefix(
                 typeof(FontManager).GetMethod("SetFontSize", new Type[] { typeof(TextMesh), typeof(int) }),
@@ -775,6 +799,37 @@ namespace HelloMod
                 DreamQuestConfig.CoverFont = true;
             }
         }
+
+        private void LoadLocalArtResource()
+        {
+            RegisterTextureSourceFromLocal("Textures/ButtonBase", $"{Paths.PluginPath}\\ArtResource\\GUI\\ButtonBase.png");
+            RegisterTextureSourceFromLocal("Textures/ButtonDisabled", $"{Paths.PluginPath}\\ArtResource\\GUI\\ButtonDisabled.png");
+            RegisterTextureSourceFromLocal("Textures/ButtonPressed", $"{Paths.PluginPath}\\ArtResource\\GUI\\ButtonPressed.png");
+            RegisterTextureSourceFromLocal("Textures/TextImageBorderless", $"{Paths.PluginPath}\\ArtResource\\GUI\\contentBG.png");
+        }
+
+        private static int totalRequireResource = 0;
+        private void LoadAssetBundle(int version)
+        {
+            totalRequireResource = DreamQuestConfig.IsUseOtherResource ? 2 : 7;
+            //载入字体
+            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Important\\fontPack.unity3d", version, OnLoadFont));
+            //载入 许愿 卡牌
+            StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Important\\texturePack.unity3d", version, OnLoadPenltyCardTexture));
+
+            if (DreamQuestConfig.IsUseOtherResource) {
+                //载入额外的 替换UI
+                //StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\GUITextures.unity3d", version, OnLoadOverrideGUITexture));
+                //载入额外的 地形替换 
+                StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\DungeonTextures.unity3d", version, OnLoadOverrideDungeonTexture));
+                //载入额外的 怪物替换 
+                StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\MonsterTextures.unity3d", version, OnLoadOverrideMonsterDungeonTexture));
+                //载入额外的 角色大图替换 
+                StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Professiontextures_big.unity3d", version, OnLoadOverrideProfessionTextureBig));
+                //载入额外的 角色小图替换 
+                StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Professiontextures_little.unity3d", version, OnLoadOverrideProfessionTextureLittle));
+            }
+        }
         #region PatchMethod
         public void PatchTargetPostfix(MethodInfo tm, MethodInfo pm)
         {
@@ -1248,6 +1303,37 @@ namespace HelloMod
             CardList.allCards.Add("");//
         }
 
+        public static bool Resource_Load_Prefix(ref UnityEngine.Object __result, string path, Type systemTypeInstance)
+        {
+            if (systemTypeInstance == typeof(Texture)) {
+                mLogger.LogMessage("Try Load Texture:" + path);
+                //查询 AssetBundle中是否存在相同路径的资源，如果有则进行替换，如果没有就沿用旧资源
+                Texture tex = GlobalTextureManager.GetTextureByModTextureKey(path);//全局的自定义材质管理器
+                if (tex != null)
+                {
+                    __result = tex;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static void RegisterTextureSourceFromLocal(string registerPath, string localPath)
+        {
+            if (File.Exists(localPath))
+            {
+                byte[] fileData = File.ReadAllBytes(localPath);
+                Texture2D tex = new Texture2D(2, 2);
+                tex.LoadImage(fileData);
+                //注册
+                GlobalTextureManager.RegisterModTexture(registerPath, (path) => { return tex; });
+            }
+            else
+            {
+                mLogger.LogError("图片文件未找到: " + localPath);
+            }
+        }
+
         private void OnLoadFont(AssetBundle assetBundle)
         {
             if (assetBundle.mainAsset != null)
@@ -1310,6 +1396,127 @@ namespace HelloMod
             }
         }
 
+        private void OnLoadOverrideGUITexture(AssetBundle assetBundle)
+        {
+            if (assetBundle.mainAsset != null)
+            {
+                UnityEngine.Object[] overrideTexObjArr = assetBundle.LoadAll(typeof(Texture));
+                for (int i = 0; i < overrideTexObjArr.Length; i++)
+                {
+                    Texture tex = overrideTexObjArr[i] as Texture;
+                    mLogger.LogMessage("Register Texture:Textures/" + tex.name + "||" + tex.name);
+                    GlobalTextureManager.RegisterModTexture("Textures/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：" + assetBundle.name + ".unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+        private void OnLoadOverrideDungeonTexture(AssetBundle assetBundle)
+        {
+            if (assetBundle.mainAsset != null)
+            {
+                UnityEngine.Object[] overrideTexObjArr = assetBundle.LoadAll(typeof(Texture));
+                for (int i = 0; i < overrideTexObjArr.Length; i++)
+                {
+                    Texture tex = overrideTexObjArr[i] as Texture;
+                    mLogger.LogMessage("Register Texture:DungeonTextures/Little/" + tex.name + "||" + tex.name);
+                    GlobalTextureManager.RegisterModTexture("DungeonTextures/Little/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                    GlobalTextureManager.RegisterModTexture("DungeonTextures/Big/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：" + assetBundle.name + ".unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+        private void OnLoadOverrideMonsterDungeonTexture(AssetBundle assetBundle)
+        {
+            if (assetBundle.mainAsset != null)
+            {
+                UnityEngine.Object[] overrideTexObjArr = assetBundle.LoadAll(typeof(Texture));
+                for (int i = 0; i < overrideTexObjArr.Length; i++)
+                {
+                    Texture tex = overrideTexObjArr[i] as Texture;
+                    mLogger.LogMessage("Register Texture:DungeonTextures/Little/" + tex.name + "||" + tex.name);
+                    GlobalTextureManager.RegisterModTexture("DungeonTextures/Little/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                    GlobalTextureManager.RegisterModTexture("DungeonTextures/Big/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：" + assetBundle.name + ".unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+        private void OnLoadOverrideProfessionTextureLittle(AssetBundle assetBundle)
+        {
+            if (assetBundle.mainAsset != null)
+            {
+                UnityEngine.Object[] overrideTexObjArr = assetBundle.LoadAll(typeof(Texture));
+                for (int i = 0; i < overrideTexObjArr.Length; i++)
+                {
+                    Texture tex = overrideTexObjArr[i] as Texture;
+                    mLogger.LogMessage("Register Texture:ProfessionTextures/Little/" + tex.name + "||" + tex.name);
+                    GlobalTextureManager.RegisterModTexture("ProfessionTextures/Little/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                }
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：" + assetBundle.name + ".unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+        private void OnLoadOverrideProfessionTextureBig(AssetBundle assetBundle)
+        {
+            if (assetBundle.mainAsset != null)
+            {
+                UnityEngine.Object[] overrideTexObjArr = assetBundle.LoadAll(typeof(Texture));
+                for (int i = 0; i < overrideTexObjArr.Length; i++)
+                {
+                    Texture tex = overrideTexObjArr[i] as Texture;
+                    mLogger.LogMessage("Register Texture:ProfessionTextures/Big/" + tex.name + "||" + tex.name);
+                    GlobalTextureManager.RegisterModTexture("ProfessionTextures/Big/" + tex.name, (path) =>
+                    {
+                        return tex;
+                    });
+                }
+
+                OnAfterProfessionBigLoaded();
+            }
+            else
+            {
+                base.Logger.LogInfo("AssetBundle：" + assetBundle.name + ".unity3d  assetBundle.mainAsset 为空！");
+            }
+        }
+
+        private static void AfterLoadAllBundle()
+        {
+            if (totalRequireResource > 0)
+                return;
+            //Time.timeScale = 1.0f;//无效
+        }
 
         public IEnumerator LoadBundle(string url, int version,Action<AssetBundle> callback)
         {
@@ -1326,9 +1533,75 @@ namespace HelloMod
                 }
                 else
                 {
+                    totalRequireResource--;
                     callback.Invoke(assetBundle);
+                    AfterLoadAllBundle();
                 }
             }
+        }
+
+        private static AudioClip btnSound = null;
+
+        IEnumerator LoadAudio()
+        {
+            string fileUrl = $"file:///{Paths.PluginPath}\\SFX\\zipclick.wav"; // 使用 file 协议读取本地文件 需要 wav 或者 ogg
+            mLogger.LogMessage("尝试 || 加载音频 ||" + fileUrl);
+            WWW www = new WWW(fileUrl); // 创建 WWW 对象并加载音频
+            yield return www; // 等待加载完成
+
+            if (!string.IsNullOrEmpty(www.error))
+            {
+                mLogger.LogError("音频加载失败: " + www.error);
+            }
+            else
+            {
+                // 获取加载的音频文件
+                btnSound = www.GetAudioClip(false);
+                mLogger.LogMessage("按钮音频加载成功");
+            }
+        }
+
+        public static void NiceButton_OnMouseUp_Postfix(NiceButton __instance)
+        {
+            if (btnSound != null) {
+                FieldInfo fieldInfo = AccessTools.Field(typeof(NiceButton), "_clicked");
+                bool clicked = (bool)fieldInfo.GetValue(__instance);
+                //播放点击音效
+                if (clicked)
+                {
+                    MusicManager.instance.effectsPlayer.volume = DreamQuestConfig.SoundVolume;
+                    MusicManager.instance.effectsPlayer.PlayOneShot(btnSound);
+                }
+            }
+        }
+
+        public static bool MusicManager_FadeToMusic(ref IEnumerator __result,AudioClip m)
+        {
+            __result = FadeToMusic(m);
+            return false;
+        }
+
+        public static IEnumerator FadeToMusic(AudioClip clip)
+        {
+            float volume = 0f;
+            while(volume < DreamQuestConfig.MusicVolume)
+            {
+                MusicManager.instance.musicPlayer.volume = volume;
+                volume += Time.deltaTime;
+                if(volume > DreamQuestConfig.MusicVolume)
+                {
+                    volume = DreamQuestConfig.MusicVolume;
+                }
+                yield return new WaitForSeconds(Time.deltaTime);
+            }
+            MusicManager.instance.musicPlayer.volume = volume;
+        }
+
+        private static void LoadAudioSetting()
+        {
+            MusicManager.instance.musicPlayer.volume = DreamQuestConfig.MusicVolume;
+            MusicManager.instance.effectsPlayer.volume = DreamQuestConfig.SoundVolume;
+            mLogger.LogMessage("成功载入音频设置:" + MusicManager.instance.musicPlayer.volume + "||" + MusicManager.instance.effectsPlayer.volume);
         }
 #pragma warning restore IDE0051
     }

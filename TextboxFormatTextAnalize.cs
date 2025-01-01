@@ -17,8 +17,8 @@ namespace HelloMod
         public static bool FormatTextOverride(ref GameObject __result,ref string s, float lineWidth, ref Textbox __instance)
         {
             s = Regex.Replace(s, @"(?<=[\u4e00-\u9fa5])(?=[\u4e00-\u9fa5])|(?<=[\u4e00-\u9fa5])(?=[^\u4e00-\u9fa5])|(?<=[^\u4e00-\u9fa5])(?=[\u4e00-\u9fa5])", " ");
-            s = s.Replace("\\\\n", "\n");//需要 回车换行的位置，需要把字符"\n" 切换成回车=>"\\n"
-            s = s.Replace("\\\\t", "\t");//
+            s = s.Replace("\\\\n", " \n ");//需要 回车换行的位置，需要把字符"\n" 切换成回车=>"\\n"
+            s = s.Replace("\\\\t", " \t ");//
             return true;
         }
 

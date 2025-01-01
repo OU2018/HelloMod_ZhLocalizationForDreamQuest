@@ -44,6 +44,12 @@ namespace HelloMod
         public static bool AddModItem = true;//增加mod新增的技能
 
 
+        //24/12/30 新增项 卡面及部分美术资源替换
+        public static bool IsUseOtherResource = true;
+
+        //25/1/1
+        public static float MusicVolume = 0.1f;
+        public static float SoundVolume = 1.0f;
 
         public static bool IsZh { get { return CurrentLang == "zh"; } }
         public static bool IsEn { get { return CurrentLang == "en"; } }//一般用来判断是否执行原方法

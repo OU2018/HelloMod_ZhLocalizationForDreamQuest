@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using BepInEx;
+using System.IO;
 
 namespace HelloMod
 {
@@ -13,6 +14,30 @@ namespace HelloMod
         public static bool InitializeOverride(MainMenu __instance)
         {
             HelloMod.mLogger.LogInfo("MainMenuOverride Success Initialized");
+            //更换 游戏封面图
+            if (DreamQuestConfig.IsUseOtherResource)//TODO:可以更细致的设定，由玩家决定哪些要进行覆盖
+            {
+                GameObject bgGobj = GameObject.Find("Background");
+                //bgGobj.transform.localScale = new Vector3(10, 10, 1);
+                MeshRenderer meshRenderer = bgGobj.GetComponent<MeshRenderer>();
+                string imagePath = $"{Paths.PluginPath}\\ArtResource\\GameCover.jpg";
+                if (File.Exists(imagePath))
+                {
+                    byte[] fileData = File.ReadAllBytes(imagePath);
+                    Texture2D texture = new Texture2D(2, 2);
+                    texture.LoadImage(fileData); // 加载图片数据
+
+                    if (meshRenderer != null)
+                    {
+                        meshRenderer.material.mainTexture = texture; // 将纹理应用到材质上
+                    }
+                }
+                else
+                {
+                    Debug.LogError("图片文件未找到: " + imagePath);
+                }
+            }
+
             GameManager.activeDungeon = null;
             Resources.UnloadUnusedAssets();
             MainMenu.instance = __instance;
@@ -41,6 +66,7 @@ namespace HelloMod
                 __instance.HighScoresButton(); 
             });
             shopDialogueButton4.FontSize(fontSize);
+            
             ShopDialogueButton shopDialogueButton5 = SDB.BasicButton(vector, TR.GetStr(TableKey, "History"), ()=> {
                 HistoryButton();
                 /*ActionBaseOnLang(new Dictionary<string, Action>()
@@ -112,10 +138,43 @@ namespace HelloMod
             }
             else
             {
+                int require = 0;
+                int current = 0;
+
+                require++;
+                //默认只需要等待字体加载完成，就可以构建 职业选择界面
                 HelloMod.OnAfterFontLoaded += () =>
                 {
-                    __instance.BuildCachedClassPickerDialogue();
+                    current++;
+                    if(current >= require)
+                    {
+                        __instance.BuildCachedClassPickerDialogue();
+                    }
                 };
+                //如果使用额外的美术资源，则会等待 职业 大图 载入完成后再构建职业选择界面
+                if (DreamQuestConfig.IsUseOtherResource)
+                {
+                    require++;
+                    HelloMod.OnAfterProfessionBigLoaded += () =>
+                    {
+                        current++;
+                        if (current >= require)
+                        {
+                            __instance.BuildCachedClassPickerDialogue();
+                        }
+                    };
+                }
+            }
+            if (DreamQuestConfig.IsUseOtherResource)
+            {
+                Color fontColor = Color.black;
+                ShopDialogueButton[] btnArr = new ShopDialogueButton[] { shopDialogueButton, shopDialogueButton10, shopDialogueButton11,
+                    shopDialogueButton9, shopDialogueButton8, shopDialogueButton7,
+                    shopDialogueButton6, shopDialogueButton5, shopDialogueButton4,
+                    shopDialogueButton3, shopDialogueButton2};
+                for (int i = 0; i < btnArr.Length; i++) {
+                    btnArr[i].FontColor(fontColor);
+                }
             }
             //播放音乐
             MusicManager.PlayMusic(Music.MAINMENU);
@@ -260,15 +319,21 @@ namespace HelloMod
             string text2 = "<Music> \n Vertex Studios \n Evil Mind Entertainment \n Lucky Lion Studios \n Water Prelude Kevin MacLeod (incompetech.com) \n Final Count Kevin MacLeod (incompetech.com)";
             string text3 = "<Editing> \n Robert Burke \n <Beta Testers> \n Alvin Chen \n Steve Nichols \n Chris Pryby \n Ruidong Wang \n Daniel Whalen";
             string text4 = "Version " + (object)1.1f + "" + " \n \n Copyright Peter Whalen 2015 \n All rights reserved";
+            string text5 = string.Empty;
             if (DreamQuestConfig.IsZh)
             {
                 text = "<美术 (好伙计)> \n Andrew Whalen \n Kristine Whalen \n \n <测试/设计/妙人儿> \n Albert Bush \n Steven Ehrlich \n Robert Krone \n Kristine Whalen";
                 text2 = "<音乐> \n Vertex Studios \n Evil Mind Entertainment \n Lucky Lion Studios \n Water Prelude Kevin MacLeod (incompetech.com) \n Final Count Kevin MacLeod (incompetech.com)";
                 text3 = "<校队/润色/编辑> \n Robert Burke \n <Beta 测试者们> \n Alvin Chen \n Steve Nichols \n Chris Pryby \n Ruidong Wang \n Daniel Whalen";
-                text4 = "版本 " + (object)1.1f + "" + " \n \n Copyright Peter Whalen 2015 \n All rights reserved \n <感谢以下朋友的帮助：>\nDreamQuest贴吧吧友\n二叶叶\nIcetric冰介 及 群友\n宵夜97、贴吧吧友无限\nBepInEx和Dnspy等工具的开发者们\n 攻略推荐：Skyphantom的视频";
+                text4 = "版本 " + (object)1.1f + "" + " \n \n Copyright Peter Whalen 2015 \n All rights reserved";
+                text5 = "<感谢以下朋友的帮助> \n DreamQuest贴吧吧友 \n 二叶叶 \n Icetric冰介 及 群友 \n 宵夜97、贴吧吧友无限 \n BepInEx和Dnspy等工具的开发者们 \n <攻略推荐> \n Skyphantom的视频 \n <特别鸣谢> \n GuoEV";
             }
 
             string[] array = new string[4] { text, text2, text3, text4 };
+            if(text5 != string.Empty)
+            {
+                array = new string[5] { text, text2, text3, text4 ,text5};
+            }
             ShopDialogueObject[] array2 = new ShopDialogueObject[array.Length];
             for (int i = 0; i < array.Length; i++)
             {

@@ -14,8 +14,8 @@ namespace HelloMod.DungeonFeatureGroup
             modCenter.PatchTargetPostfix(
                   typeof(Altar).GetMethod("Name"),
                   typeof(AltarOverride).GetMethod("Name"));
-            HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "GodName",
-                  typeof(AltarOverride).GetMethod("GodName"));
+            /*HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "GodName",
+                  typeof(AltarOverride).GetMethod("GodName"));*/
             HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "Hint",
                   typeof(AltarOverride).GetMethod("Hint"));
             HelloMod.PostPatchVirtualMethodAndOverrides(harmony, typeof(Altar), "CarvedMessage",
@@ -43,11 +43,12 @@ namespace HelloMod.DungeonFeatureGroup
                   typeof(AltarOverride).GetMethod("DisplayInMini"));
         }
         private static string _altarTableName = "Altar";
-        public static void Name(ref string __result)
+        public static void Name(ref string __result,Altar __instance)
         {
             if (!DreamQuestConfig.IsEn)
             {
                 __result = __result.Replace("Altar to ", "");//删除前面的 Altar to
+                __result = TR.GetStr(_altarTableName, __instance.GodName());
                 __result += TR.GetStr(_dungeonFeatureTableName, "Altar", "OUTFIX");
             }
         }
