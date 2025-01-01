@@ -66,18 +66,11 @@ namespace HelloMod
                 PatchTargetPostfix(
                 typeof(NiceButton).GetMethod("OnMouseUp", new Type[0]),
                 typeof(HelloMod).GetMethod("NiceButton_OnMouseUp_Postfix"));
-                //修改背景音乐的方法，使得音量可以被控制
-                try
-                {
-                    PatchTargetPrefix(
-                    typeof(MusicManager).GetMethod("FadeToMusic", BindingFlags.NonPublic),
-                    typeof(HelloMod).GetMethod("MusicManager_FadeToMusic"));
-                }
-                catch (Exception ex) { 
-                    mLogger.LogError(ex);
-                }
             }
-
+            //修改背景音乐的方法，使得音量可以被控制
+            PatchTargetPostfix(
+                typeof(MusicManager).GetMethod("Awake"),
+                typeof(HelloMod).GetMethod("MusicManager_Awake_Postfix"));
             //[基础区域]
             //让ShopDialogueButton创建出来后就自动重载字体
             PatchTargetPostfix(
@@ -760,8 +753,9 @@ namespace HelloMod
         {
             var parser = new IniParser();
             parser.Load(configPath);
-
+            //语言区域
             string lang = parser.GetString("Lang", "Current", "en");
+            //功能激活区域
             bool coverFont = parser.GetBool("Features", "CoverFont", false);
             bool unlockAll = parser.GetBool("Features", "UnlockAllMonster", false);
             bool activeCheat = parser.GetBool("Features", "ActiveCheatMenu", false);
@@ -775,7 +769,11 @@ namespace HelloMod
             bool nameCover = parser.GetBool("Features", "UsePlayerNameTransition", true);
 
             bool skipReward = parser.GetBool("Features", "SkipLevelUpReward", true);
+            bool isUseOtherResource = parser.GetBool("Features", "IsUseOtherResource", true);
+            //数值区域
             int skipRewardGold = parser.GetInt("Settings", "SkipLevelUpRewardGold", 10);
+            float musicVolume = 0.01f * parser.GetInt("Settings", "MusicVolume", 5);
+            float soundVolume = 0.01f * parser.GetInt("Settings", "SoundVolume", 50);
             /*int maxPlayers = parser.GetInt("Settings", "MaxPlayers", 4);
             int gameSpeed = parser.GetInt("Settings", "GameSpeed", 1);*/
             Logger.LogInfo(lang + "|" + coverFont + "|" + unlockAll);
@@ -793,6 +791,10 @@ namespace HelloMod
             DreamQuestConfig.UsePlayerNameTransition = nameCover;
             DreamQuestConfig.SkipLevelUpReward = skipReward;
             DreamQuestConfig.SkipLevelUpRewardGold = skipRewardGold;
+
+            DreamQuestConfig.IsUseOtherResource = isUseOtherResource;
+            DreamQuestConfig.MusicVolume = musicVolume;
+            DreamQuestConfig.SoundVolume = soundVolume;
 
             if(DreamQuestConfig.IsZh)
             {
@@ -1575,26 +1577,10 @@ namespace HelloMod
             }
         }
 
-        public static bool MusicManager_FadeToMusic(ref IEnumerator __result,AudioClip m)
+        public static void MusicManager_Awake_Postfix()
         {
-            __result = FadeToMusic(m);
-            return false;
-        }
-
-        public static IEnumerator FadeToMusic(AudioClip clip)
-        {
-            float volume = 0f;
-            while(volume < DreamQuestConfig.MusicVolume)
-            {
-                MusicManager.instance.musicPlayer.volume = volume;
-                volume += Time.deltaTime;
-                if(volume > DreamQuestConfig.MusicVolume)
-                {
-                    volume = DreamQuestConfig.MusicVolume;
-                }
-                yield return new WaitForSeconds(Time.deltaTime);
-            }
-            MusicManager.instance.musicPlayer.volume = volume;
+            FieldInfo fieldInfo = AccessTools.Field( typeof(MusicManager),"baseVolume");
+            fieldInfo.SetValue(MusicManager.instance, DreamQuestConfig.MusicVolume);
         }
 
         private static void LoadAudioSetting()

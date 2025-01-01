@@ -48,7 +48,7 @@ namespace HelloMod
         public static bool IsUseOtherResource = true;
 
         //25/1/1
-        public static float MusicVolume = 0.1f;
+        public static float MusicVolume = 0.05f;
         public static float SoundVolume = 1.0f;
 
         public static bool IsZh { get { return CurrentLang == "zh"; } }

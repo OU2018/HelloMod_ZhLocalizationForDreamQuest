@@ -36,6 +36,20 @@ namespace HelloMod
                 {
                     Debug.LogError("图片文件未找到: " + imagePath);
                 }
+                //添加游戏Logo
+                GameObject titleGobj = new GameObject("TitleObj");
+                SpriteRenderer sprRdr = titleGobj.AddComponent<SpriteRenderer>();
+                string logoPath = $"{Paths.PluginPath}\\ArtResource\\Logo.png";
+                titleGobj.transform.position = new Vector3(0, 2.4f, -4.0f);
+                titleGobj.transform.localScale = new Vector3(-2, 2, 1);
+                if (File.Exists(logoPath))
+                {
+                    byte[] fileData = File.ReadAllBytes(logoPath);
+                    Texture2D texture = new Texture2D(2, 2);
+                    texture.LoadImage(fileData); // 加载图片数据
+
+                    sprRdr.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                }
             }
 
             GameManager.activeDungeon = null;
