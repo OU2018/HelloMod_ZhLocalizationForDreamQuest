@@ -122,6 +122,7 @@ namespace HelloMod
             }
             else if (num > __instance.GetAttribute(userAttribute))
             {
+                //此处的ClassName已经被翻译过了
                 text = stats.dungeon.player.profession.ClassName() + TR.GetStr(MainMenuOverride.TableKey, " High Score!");
             }
             if (num > __instance.GetAttribute(userAttribute))
