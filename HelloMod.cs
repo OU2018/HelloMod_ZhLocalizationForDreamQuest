@@ -61,12 +61,8 @@ namespace HelloMod
             if (DreamQuestConfig.IsUseOtherResource)
             {
                 LoadLocalArtResource();
-                StartCoroutine(LoadAudio());//TODO:可以弄成通用方法
-                //添加按钮点击的音效
-                PatchTargetPostfix(
-                typeof(NiceButton).GetMethod("OnMouseUp", new Type[0]),
-                typeof(HelloMod).GetMethod("NiceButton_OnMouseUp_Postfix"));
             }
+            LoadAudioSource();
             //修改背景音乐的方法，使得音量可以被控制
             PatchTargetPostfix(
                 typeof(MusicManager).GetMethod("Awake"),
@@ -770,6 +766,8 @@ namespace HelloMod
 
             bool skipReward = parser.GetBool("Features", "SkipLevelUpReward", true);
             bool isUseOtherResource = parser.GetBool("Features", "IsUseOtherResource", true);
+
+            bool activeButtonClickSFX = parser.GetBool("Features", "ActiveButtonClickSFX", true);
             //数值区域
             int skipRewardGold = parser.GetInt("Settings", "SkipLevelUpRewardGold", 10);
             float musicVolume = 0.01f * parser.GetInt("Settings", "MusicVolume", 5);
@@ -795,6 +793,8 @@ namespace HelloMod
             DreamQuestConfig.IsUseOtherResource = isUseOtherResource;
             DreamQuestConfig.MusicVolume = musicVolume;
             DreamQuestConfig.SoundVolume = soundVolume;
+
+            DreamQuestConfig.ActiveButtonClickSFX = activeButtonClickSFX;
 
             if(DreamQuestConfig.IsZh)
             {
@@ -830,6 +830,37 @@ namespace HelloMod
                 StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Professiontextures_big.unity3d", version, OnLoadOverrideProfessionTextureBig));
                 //载入额外的 角色小图替换 
                 StartCoroutine(LoadBundle($"file:///{Paths.PluginPath}\\AssetBundle\\Professiontextures_little.unity3d", version, OnLoadOverrideProfessionTextureLittle));
+            }
+        }
+
+        private void LoadAudioSource()
+        {
+            //按键点击音效
+            if (DreamQuestConfig.ActiveButtonClickSFX)
+            {
+                StartCoroutine(LoadAudio($"file:///{Paths.PluginPath}\\SFX\\zipclick.wav", (clip) =>
+                {
+                    btnSound = clip;
+                }));
+                //添加按钮点击的音效
+                PatchTargetPostfix(
+                typeof(NiceButton).GetMethod("OnMouseUp", new Type[0]),
+                typeof(HelloMod).GetMethod("NiceButton_OnMouseUp_Postfix"));
+            }
+            if (DreamQuestConfig.ActiveHurtSFX)
+            {
+                StartCoroutine(LoadAudio($"file:///{Paths.PluginPath}\\SFX\\best_snare.wav", (clip) =>
+                {
+                    impactSound = clip;
+                }));
+                StartCoroutine(LoadAudio($"file:///{Paths.PluginPath}\\SFX\\VoicePack\\zombieYell1.wav", (clip) =>
+                {
+                    hurtSound = clip;
+                }));
+                //添加按钮点击的音效
+                PatchTargetPostfix(
+                typeof(GamePhysical).GetMethod("AddToVisualStackNoYield", new Type[] { typeof(object), typeof(object[]), typeof(string) }),
+                typeof(HelloMod).GetMethod("GamePhysical_AddToVisualStackNoYield_Postfix"));
             }
         }
         #region PatchMethod
@@ -1542,15 +1573,53 @@ namespace HelloMod
             }
         }
 
-        private static AudioClip btnSound = null;
-
-        IEnumerator LoadAudio()
+        public static void GamePhysical_AddToVisualStackNoYield_Postfix(object o, object[] arg, string name, GamePhysical __instance)
         {
-            string fileUrl = $"file:///{Paths.PluginPath}\\SFX\\zipclick.wav"; // 使用 file 协议读取本地文件 需要 wav 或者 ogg
-            mLogger.LogMessage("尝试 || 加载音频 ||" + fileUrl);
-            WWW www = new WWW(fileUrl); // 创建 WWW 对象并加载音频
-            yield return www; // 等待加载完成
+            if (o != null && !name.IsNullOrWhiteSpace()) {
+                if (name.Equals("Shake") && o.GetType().Equals(typeof(Infoblock)))
+                { //战斗中 头像摇晃的调用
+                    SolvePlayerHurt((Infoblock)o);
+                }
+            }
+        }
 
+        private static void SolvePlayerHurt(Infoblock infoblock)
+        {
+            if (infoblock == null || impactSound == null || infoblock.player == null)
+            {
+                return;
+            }
+            mLogger.LogMessage(infoblock.ToString() +"||" + infoblock.player);
+
+            if (infoblock.player.isAI)
+            {
+                Monster monster = infoblock.player.game.currentDungeon.currentMonster;
+                //可以根据怪物播放音效
+                MusicManager.instance.effectsPlayer.volume = DreamQuestConfig.SoundVolume;
+                MusicManager.instance.effectsPlayer.PlayOneShot(hurtSound);
+            }
+            else
+            {
+                DungeonPlayer player = infoblock.player.game.currentDungeon.player;
+                ProfessionBase profession = player.profession;
+                if (profession != null)
+                {
+                    //可以根据职业播放音效
+                    MusicManager.instance.effectsPlayer.volume = DreamQuestConfig.SoundVolume;
+                    MusicManager.instance.effectsPlayer.PlayOneShot(hurtSound);
+                }
+            }
+        }
+
+        private static AudioClip btnSound = null;
+        private static AudioClip impactSound = null;
+        private static AudioClip hurtSound = null;
+
+        IEnumerator LoadAudio(string fileUrl, Action<AudioClip> callback)
+        {
+            mLogger.LogMessage("尝试 || 加载音频 ||" + fileUrl);
+            WWW www = new WWW(fileUrl); // 创建 WWW 对象并加载音频，使用 file 协议读取本地文件 需要 wav 或者 ogg
+            yield return www; // 等待加载完成
             if (!string.IsNullOrEmpty(www.error))
             {
                 mLogger.LogError("音频加载失败: " + www.error);
@@ -1558,8 +1627,8 @@ namespace HelloMod
             else
             {
                 // 获取加载的音频文件
-                btnSound = www.GetAudioClip(false);
-                mLogger.LogMessage("按钮音频加载成功");
+                mLogger.LogMessage("音频加载成功:" + fileUrl);
+                callback.Invoke(www.GetAudioClip(false));
             }
         }
 
@@ -1582,6 +1651,8 @@ namespace HelloMod
             FieldInfo fieldInfo = AccessTools.Field( typeof(MusicManager),"baseVolume");
             fieldInfo.SetValue(MusicManager.instance, DreamQuestConfig.MusicVolume);
         }
+
+
 
         private static void LoadAudioSetting()
         {

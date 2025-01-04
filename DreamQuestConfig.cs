@@ -50,7 +50,9 @@ namespace HelloMod
         //25/1/1
         public static float MusicVolume = 0.05f;
         public static float SoundVolume = 1.0f;
+        public static bool ActiveButtonClickSFX = true;
 
+        public static bool ActiveHurtSFX = true;
         public static bool IsZh { get { return CurrentLang == "zh"; } }
         public static bool IsEn { get { return CurrentLang == "en"; } }//一般用来判断是否执行原方法
     }
