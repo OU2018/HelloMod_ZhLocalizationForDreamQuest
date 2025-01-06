@@ -768,6 +768,7 @@ namespace HelloMod
             bool isUseOtherResource = parser.GetBool("Features", "IsUseOtherResource", true);
 
             bool activeButtonClickSFX = parser.GetBool("Features", "ActiveButtonClickSFX", true);
+            bool activeHurtSFX = parser.GetBool("Features", "ActiveHurtSFX", true);
             //数值区域
             int skipRewardGold = parser.GetInt("Settings", "SkipLevelUpRewardGold", 10);
             float musicVolume = 0.01f * parser.GetInt("Settings", "MusicVolume", 5);
@@ -795,6 +796,7 @@ namespace HelloMod
             DreamQuestConfig.SoundVolume = soundVolume;
 
             DreamQuestConfig.ActiveButtonClickSFX = activeButtonClickSFX;
+            DreamQuestConfig.ActiveHurtSFX = activeHurtSFX;
 
             if(DreamQuestConfig.IsZh)
             {
@@ -1585,7 +1587,7 @@ namespace HelloMod
 
         private static void SolvePlayerHurt(Infoblock infoblock)
         {
-            if (infoblock == null || impactSound == null || infoblock.player == null)
+            if (infoblock == null || impactSound == null || infoblock.player == null || hurtSound == null)
             {
                 return;
             }
