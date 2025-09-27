@@ -57,7 +57,15 @@ namespace HelloMod
                     text = "DO NOT play cards named '{value}'";
                 }
             }
-            text = HelloMod.Csv.GetTranslationByID("DecreeString", "_"+decreeType.ToString() + "_" + __instance.isLike).Replace(TR.PlaceHolder, __instance.strength.ToString());
+
+            if(decreeType == DecreeType.CARD_TYPE && DreamQuestConfig.IsZh)
+            {
+                text = HelloMod.Csv.GetTranslationByID("DecreeString", "_" + decreeType.ToString() + "_" + __instance.isLike).Replace(TR.PlaceHolder, "<" + TR.GetStr(TR.SK, __instance.strength.ToString()) + "> ");
+            }
+            else
+            {
+                text = HelloMod.Csv.GetTranslationByID("DecreeString", "_" + decreeType.ToString() + "_" + __instance.isLike).Replace(TR.PlaceHolder, __instance.strength.ToString());
+            }
             __result = text;
         }
     }

@@ -665,6 +665,17 @@ namespace HelloMod
             PatchTargetPostfix(
                 typeof(DungeonActionPortent).GetMethod("BuildText"),
                 typeof(DungeonActionPortentOverride).GetMethod("BuildText"));
+
+            //Boss Decrees 2025/09/26 梦境之主的禁令
+            PatchTargetPrefix(
+                typeof(LordlyDecrees).GetMethod("AddDecree"),
+                typeof(LordlyDecreeOverride).GetMethod("AddDecree"));
+            PatchTargetPrefix(
+                typeof(LordlyDecrees).GetMethod("BuildButton"),
+                typeof(LordlyDecreeOverride).GetMethod("BuildButton"));
+            PatchTargetPrefix(
+                typeof(LordlyDecrees).GetMethod("ViewDecrees"),
+                typeof(LordlyDecreeOverride).GetMethod("ViewDecrees"));
             //CheatMenu 运行时补丁
             var cheatMenuMethod = typeof(DungeonPhysical).GetMethod("CheatMenu", BindingFlags.Public | BindingFlags.Instance);
             var cheatMenuDict = new Dictionary<string, string> { 
