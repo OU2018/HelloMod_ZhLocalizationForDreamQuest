@@ -676,6 +676,38 @@ namespace HelloMod
             PatchTargetPrefix(
                 typeof(LordlyDecrees).GetMethod("ViewDecrees"),
                 typeof(LordlyDecreeOverride).GetMethod("ViewDecrees"));
+            //DungeonAction Dream \Dark Pact等的翻译
+            PatchTargetPostfix(
+                  typeof(DungeonActionCopySacrifice).GetMethod("TitleString"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionCopySacrifice_TitleString_Postfix"));
+            PatchTargetPostfix(
+                  typeof(DungeonActionCopySacrifice).GetMethod("ConfirmName"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionCopySacrifice_ConfirmName_Postfix"));
+            PatchTargetPostfix(
+                  typeof(DungeonActionDream).GetMethod("TitleString"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionDream_TitleString_Postfix"));
+            PatchTargetPostfix(
+                  typeof(DungeonActionDream).GetMethod("ConfirmName"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionDream_ConfirmName_Postfix"));
+
+            PatchTargetPostfix(
+                  typeof(DungeonActionDream).GetMethod("AllCards"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionDream_AllCards_Postfix"));
+            PatchTargetPostfix(
+                  typeof(DungeonActionDream).GetMethod("ShouldCull"),
+                  typeof(DungeonActionDeckTargettedOverride).GetMethod("DungeonActionDream_ShouldCull_Postfix"));
+            //检查为什么会出现 AllCardViewer不可见的情况 25/09/30 TODO:未解决
+            /*mLogger.LogMessage("[test ]:");
+            foreach (var item in typeof(Dungeon).GetMethods())
+            {
+                mLogger.LogMessage("[methods]:" + item.ToString());
+            }
+            
+            mLogger.LogMessage("[test]:" + typeof(Dungeon).GetMethod("InternalDeckViewer", BindingFlags.NonPublic).ToString());
+            PatchTargetPrefix(
+                typeof(Dungeon).GetMethod("InternalDeckViewer", BindingFlags.NonPublic),
+                typeof(DungeonOverride).GetMethod("InternalDeckViewer"));*/
+
             //CheatMenu 运行时补丁
             var cheatMenuMethod = typeof(DungeonPhysical).GetMethod("CheatMenu", BindingFlags.Public | BindingFlags.Instance);
             var cheatMenuDict = new Dictionary<string, string> { 
@@ -890,7 +922,7 @@ namespace HelloMod
                 return;
             }
             var info = harmony.Patch(tm, postfix: new HarmonyMethod(pm));
-            base.Logger.LogInfo("Patch result: " + info);
+            base.Logger.LogInfo("Postfix Patch result: " + info);
         }
 
         public void PatchTargetPrefix(MethodInfo tm, MethodInfo pm)
@@ -907,7 +939,7 @@ namespace HelloMod
                 return;
             }
             var info = harmony.Patch(tm, prefix: new HarmonyMethod(pm));
-            base.Logger.LogInfo("Patch result: " + info);
+            base.Logger.LogInfo("Prefix Patch result: " + info);
         }
 
         public static void PostPatchVirtualMethodAndOverrides(Harmony harmony, Type baseType, string methodName, MethodInfo postfix)

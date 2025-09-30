@@ -56,5 +56,48 @@ namespace HelloMod
             t.text = text;
             return false;
         }
+
+        //TODO:弃用
+        public static bool InternalDeckViewer(ShopDialogueObject p, string titleString, List<ShopDialogueButton> b, Action onCancel, bool hasDynamicTitle, Action<TextMesh> dynamicTitle, ShopDialogueObject extra, Dungeon __instance)
+        {
+            HelloMod.mLogger.LogInfo("内部卡组查看器-调用！");
+            int num = 36;
+            if (GameManager.IsIPhone())
+            {
+                num = 48;
+            }
+            ShopDialogueObject shopDialogueObject = SDB.CenteredText((float)6, titleString, num, Color.white);
+            if (hasDynamicTitle)
+            {
+                shopDialogueObject = SDB.Align(new ShopDialogueObject[]
+                {
+                shopDialogueObject,
+                SDB.FancyDynamicText((TextMesh t)=>{  dynamicTitle.Invoke(t); } , num)
+                }, "VP", 0.1f);
+            }
+            ShopDialogueObject shopDialogueObject2 = null;
+            if (b != null && b.Count > 0)
+            {
+                shopDialogueObject2 = SDB.Align(b.ToArray(), "HC", (float)6);
+            }
+            ShopDialogueAligned shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueObject, p }, "VP", 0.2f);
+            if (extra)
+            {
+                shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueAligned, extra }, "VP", 0.2f);
+            }
+            if (shopDialogueObject2)
+            {
+                shopDialogueAligned = SDB.Align(new ShopDialogueObject[] { shopDialogueAligned, shopDialogueObject2 }, "VP", 0.2f);
+            }
+            SDB.Background(shopDialogueAligned, (Texture)Resources.Load("Textures/TextImageBorderless", typeof(Texture)));
+            SDB.CancelButton(shopDialogueAligned,()=> { onCancel.Invoke(); } );
+            shopDialogueAligned.UpperCenterTo(__instance.ShopLocation());
+            __instance.MoveDeckbuilder(shopDialogueAligned);
+            shopDialogueAligned.DoneBuilding();
+            __instance.activeShop = shopDialogueAligned;
+            HelloMod.mLogger.LogInfo("内部卡组查看器-显示完成！");
+
+            return false;
+        }
     }
 }

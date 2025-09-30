@@ -149,6 +149,31 @@ namespace HelloMod
                 {
                     player.AddAction(new DungeonActionFindMonster());
                 });
+                //测试 25/09/27
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "CopySacrifice", (player) =>
+                {
+                    player.AddAction(new DungeonActionCopySacrifice());
+                });
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "ActionDream", (player) =>
+                {
+                    player.AddAction(new DungeonActionDream());
+                });
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "ActionSacrifice", (player) =>
+                {
+                    player.AddAction(new DungeonActionSacrifice());
+                });
+                AddBasicButton((lang, name) => {
+                    return TR.GetStr(TableKey, name);
+                }, "AllCardViewer", (player) =>
+                {
+                    __instance.dungeon.AllCardsDeckViewer("全卡图鉴", new List<ShopDialogueButton> { SDB.BasicButton(__instance.dungeon.physical.DefaultButtonSize(), "确认", null, null) }, () => { __instance.dungeon.WindowBack(); });
+                });
                 //测试 模组 按钮数量
                 /*for (int i = 0; i < maxWinItemCount * 2 + 3; i++) {
                     btnList.Add(SDB.BasicButton(new Vector2((float)4, 0.4f), TR.GetStr(TableKey, "Random Alchemy"), () => { RandomAlchemy(__instance.dungeon.player); }));

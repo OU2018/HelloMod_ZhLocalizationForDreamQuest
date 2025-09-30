@@ -137,7 +137,7 @@ namespace HelloMod
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
                 writer.WriteLine($"{newKey},{newTranslation}");
-                writer.WriteLine($"zh{newId},待翻译");
+                writer.WriteLine($"zh{newId},{newTranslation}-未翻译");
             }
 
             return newId;

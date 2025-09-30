@@ -109,7 +109,7 @@ namespace HelloMod
                         string filePath = Path.Combine(dirPath, tableKey + ".csv");
                         using (StreamWriter writer = new StreamWriter(filePath, true))
                         {
-                            writer.WriteLine($"{str},待翻译,{note}");
+                            writer.WriteLine($"{str},{str}未翻译,{note}");
 
                             HelloMod.mLogger.LogMessage("Create new line:" + str);
                         }

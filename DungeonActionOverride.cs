@@ -26,6 +26,13 @@ namespace HelloMod
                     __result = TR.GetStr("SongName", singer.song.name);
                 }
             }
+            else if (__instance.GetType() == typeof(DungeonActionCopySacrifice))
+            {
+                if (!DreamQuestConfig.IsEn)
+                {
+                    __result = TR.GetStr("DungeonAction", "DarkPact").Replace(TR.PlaceHolder, (__instance as DungeonActionCopySacrifice).Cost().ToString());
+                }
+            }
             else
             {
                 __result = TR.GetStr("DungeonAction", __result);

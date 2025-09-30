@@ -143,5 +143,33 @@ namespace HelloMod
             }
             return false;
         }
+        //TODO: 25/09/27
+        public static void DungeonActionCopySacrifice_TitleString_Postfix(ref string __result)
+        {
+            __result = TR.GetStr(DungeonPhysicalOverride.TableKey, "Choose a card to copy");
+        }
+        public static void DungeonActionCopySacrifice_ConfirmName_Postfix(ref string __result)
+        {
+            __result = TR.GetStr(DungeonPhysicalOverride.TableKey, "Copy");
+        }
+
+        public static void DungeonActionDream_TitleString_Postfix(ref string __result)
+        {
+            __result = TR.GetStr(DungeonPhysicalOverride.TableKey, "Add a card to your deck");
+        }
+        public static void DungeonActionDream_ConfirmName_Postfix(ref string __result)
+        {
+            __result = TR.GetStr(DungeonPhysicalOverride.TableKey, "Learn");
+        }
+
+        public static void DungeonActionDream_AllCards_Postfix(ref bool __result)
+        {
+            __result = false;
+        }
+
+        public static void DungeonActionDream_ShouldCull_Postfix(ref bool __result)
+        {
+            __result = false;
+        }
     }
 }
